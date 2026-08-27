@@ -49,37 +49,45 @@ A remote party cannot grab your IP out of thin air; **you must establish a direc
 
 When someone enters an IP address into an online lookup tool (e.g., MaxMind GeoIP, IPinfo, DB-IP), the result is **coarse, estimated geographic routing data**, NOT a GPS coordinate of a physical building.
 
+```mermaid
+flowchart TD
+    subgraph GeoIP_Limits["🌍 Pure IP Geolocation (MaxMind / IPinfo)"]
+        IP["🎯 Target IP: 73.182.xx.xx"] --> Country["✅ Country Level (~99% Accurate)"]
+        IP --> Region["✅ Region / State (~80% Accurate)"]
+        IP --> City["⚠️ City Centroid (~60% Accurate)"]
+        IP --> Street["❌ Rooftop House Address (0% Impossible)"]
+    end
 ```
-+-------------------------------------------------------------+
-|                     WHAT GEOIP SHOWS                        |
-|                                                             |
-|   [ Public IP: 73.182.xx.xx ]                               |
-|   -> ISP: Comcast Cable Communications                      |
-|   -> Autonomous System: AS7922                              |
-|   -> City / Metro Area: Atlanta, GA (Confidence: ~60-80%)   |
-|   -> Coordinates: 33.7490, -84.3880 (City Center Centroid)  |
-|                                                             |
-|   WARNING: The GPS coordinates provided by IP lookups are   |
-|   just the arbitrary center point of the city or postal     |
-|   code area. It is NOT a rooftop coordinate.                |
-+-------------------------------------------------------------+
-```
+
+> [!CAUTION]
+> **Warning**: The GPS coordinates provided by IP lookups are just the arbitrary mathematical centroid of the city or postal code. It is **never** a rooftop or residential building coordinate.
 
 ### 2.1 How GeoIP Databases Work
 1. **BGP and Routing Hubs**: ISPs announce IP blocks assigned to regional aggregation nodes (DSLAMs, CMTS, PoPs).
 2. **Registry Data (RIRs)**: Regional registries (ARIN, RIPE, APNIC) record the corporate mailing address of the ISP organization leasing the block, not the residential subscriber.
 
 ### 2.2 Accuracy Limits
-* **Country-level accuracy**: ~95–99%
-* **Region/State accuracy**: ~75–90%
-* **City accuracy**: ~50–75%
-* **Street/House accuracy**: **0% (Impossible via pure IP routing tables)**
+
+| Scope | Average Accuracy | Mechanism |
+| :--- | :--- | :--- |
+| **Country Level** | ~95% – 99% | Regional Internet Registry (RIR) block allocations |
+| **State / Region** | ~75% – 90% | ISP regional Autonomous System (ASN) edge routers |
+| **City / Metro** | ~50% – 75% | Broadband aggregation points (PoPs / DSLAMs) |
+| **Street / House** | **0%** | **Impossible via IP routing alone** |
 
 ---
 
 ## 3. How Physical House Locations are ACTUALLY Found
 
 If IP geolocation is inaccurate, how do skilled doxxers, threat actors, and investigators actually locate a specific home?
+
+```mermaid
+flowchart TD
+    A["🎯 Physical House Identification Vectors"] --> B["📡 Wi-Fi BSSID Mapping (WiGLE / Skyhook 5-10m)"]
+    A --> C["🗄️ Leaked Delivery & Billing Databases (OSINT)"]
+    A --> D["📋 ISP DHCP Subpoena Records (Legal / Insider)"]
+    A --> E["📱 Onboard Device GPS & Sensor APIs"]
+```
 
 ### 3.1 Wi-Fi BSSID Geolocation (War-driving Databases)
 This is the most powerful remote physical location exploit:

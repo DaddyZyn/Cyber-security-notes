@@ -25,13 +25,10 @@ A **Media Access Control (MAC)** address is a 48-bit (6-byte) physical identifie
 
 Format: `00:1A:2B:3C:4D:5E` (6 hexadecimal octets)
 
-```
-+------------------------------------+------------------------------------+
-|  OUI (Organization Unique ID)      |    NIC-Specific Serial             |
-|  First 3 Bytes (00:1A:2B)          |    Last 3 Bytes (3C:4D:5E)         |
-|  Identifies Chip Manufacturer      |    Unique Hardware Serial Number   |
-+------------------------------------+------------------------------------+
-```
+| Field | Length | Example Value | Purpose |
+| :--- | :--- | :--- | :--- |
+| **OUI (Organization Unique Identifier)** | First 3 Bytes (24 Bits) | `00:1A:2B` | Registered chip vendor (Intel, Realtek, Apple) |
+| **NIC Serial Identifier** | Last 3 Bytes (24 Bits) | `3C:4D:5E` | Unique physical hardware serial number |
 
 ---
 
@@ -41,27 +38,24 @@ Format: `00:1A:2B:3C:4D:5E` (6 hexadecimal octets)
 * **MAC addresses operate exclusively at OSI Layer 2 (Data Link Layer).**
 * **MAC addresses NEVER leave your local broadcast domain / local router.**
 
-When you send a packet to `google.com`:
-1. Your PC creates an Ethernet frame with:
-   * **Source MAC**: Your PC's physical NIC (`00:11:22:33:44:55`)
-   * **Destination MAC**: Your Router's LAN interface MAC (`AA:BB:CC:DD:EE:FF`)
-   * **Source IP**: `192.168.1.50`
-   * **Destination IP**: `142.250.190.46` (Google)
-2. The packet hits your router. The router **strips off your Ethernet frame entirely** (discarding your MAC address).
-3. The router creates a *new* frame with its own upstream MAC address and forwards it through your ISP.
+### 2.2 Layer 2 Frame Stripping Flow
 
-### 2.2 Why Remote Servers Cannot See Your MAC
+```mermaid
+sequenceDiagram
+    autonumber
+    participant PC as 💻 Your PC (NIC)
+    participant Router as 🖧 Local Gateway (NAT)
+    participant Web as 🌐 Target Server (Internet)
+    Note over PC,Router: OSI Layer 2 Broadcast Domain
+    PC->>Router: Frame [Src MAC: 00:11:22.. | Dst MAC: Router_LAN_MAC]
+    Note over Router: ⚠️ ROUTER STRIPS ETHERNET FRAME & MAC
+    Note over Router,Web: OSI Layer 3 Public IP Routing
+    Router->>Web: Packet [Src IP: Router_Public_IP | Dst IP: Target_IP]
+    Note over Web: Server sees 0% of your PC's physical MAC
 ```
-[ Your PC ] ---------------------> [ Local Router ] ---------------------> [ Google Server ]
-  Src MAC: 00:11:22:33:44:55          Src MAC: Router_WAN_MAC              Google only sees
-  Dst MAC: Router_LAN_MAC            Dst MAC: ISP_Gateway_MAC              Router's Public IP
-  Src IP:  192.168.1.50              Src IP:  Router_Public_IP
-  Dst IP:  Google_IP                 Dst IP:  Google_IP
-         \_________________________/        \____________________________/
-             Layer 2: Your MAC is                 Layer 2: Your MAC is
-             visible ONLY here                     GUTTED and GONE
-```
-* **Conclusion**: Remote web servers, game servers, and website operators **cannot see your physical MAC address from an IP packet header**.
+
+> [!NOTE]
+> **Conclusion**: Remote web servers, game servers, and website operators **cannot see your physical MAC address from an IP packet header**.
 
 ---
 

@@ -36,65 +36,84 @@ Have a concept you want explained or documented in deep technical detail?
 
 ---
 
-## 🔍 Module Overviews
+## 🔍 Visual Architecture Overviews
 
-### 🌐 [01. Networking Fundamentals](./topics/01-networking-fundamentals/README.md)
-* **NAT (Network Address Translation)**: How private subnets (`192.168.x.x`, `10.x.x.x`, `172.16.x.x`) are multiplexed behind a single public IPv4 gateway via ephemeral source ports.
-* **The IPv6 Dual-Stack Trap**: Why VPN tunnels that only handle IPv4 expose your true identity through native IPv6 SLAAC address routing.
-* **Encrypted DNS vs. Plaintext**: Why standard UDP port 53 reveals every visited domain to ISPs despite HTTPS, and how DNS-over-HTTPS (DoH) / DNS-over-TLS (DoT) solve Layer 7 visibility.
+### 🌐 01. Networking & NAT Translation Flow
+How private subnets (`192.168.x.x`) communicate across the public internet via Network Address Translation:
 
-```
-[ Local PC: 192.168.1.50 ] ➔ (LAN Ethernet) ➔ [ NAT Gateway: 192.168.1.1 ] ➔ (WAN Uplink) ➔ [ Target Server: 203.0.113.42 ]
-```
-
----
-
-### 💻 [02. Hardware Identifiers & MAC Addresses](./topics/02-hardware-identifiers/README.md)
-* **The Layer 2 vs. Layer 3 Hard Boundary**:
-  * Ethernet frames (and MAC addresses) exist **strictly inside the local broadcast domain**.
-  * Your router **strips off your PC's MAC address** and generates a brand-new Ethernet frame before forwarding packets across the WAN. Remote web servers and game servers **cannot** read your MAC from an incoming IP packet.
-* **How Hardware is Actually Tracked**:
-  * Captive portals on public Wi-Fi APs recording physical association logs.
-  * Native desktop applications and anti-cheats invoking `GetAdaptersAddresses()` or `GetAdaptersInfo()` and transmitting serialized HWIDs over encrypted HTTPS payloads.
-
-```
-+------------------------------------+------------------------------------+
-|  OUI (Organization Unique ID)      |    NIC-Specific Serial             |
-|  First 3 Bytes (00:1A:2B)          |    Last 3 Bytes (3C:4D:5E)         |
-|  Identifies Chip Manufacturer      |    Unique Hardware Serial Number   |
-+------------------------------------+------------------------------------+
+```mermaid
+flowchart LR
+    A["💻 <b>Local Device</b><br><code>192.168.1.50</code><br><i>RFC 1918 Subnet</i>"] -->|"LAN Ethernet / Wi-Fi"| B["🖧 <b>NAT Gateway Router</b><br><code>192.168.1.1</code><br><i>Translates Port & IP</i>"]
+    B -->|"WAN Uplink"| C["🌐 <b>Public Internet / Target</b><br><code>203.0.113.42</code><br><i>Sees Only Router Public IP</i>"]
 ```
 
 ---
 
-### 🛰️ [03. IP Tracking, Geolocation Realities & House-Level Doxxing](./topics/03-ip-tracking-and-geolocation/README.md)
-* **The GeoIP Myth**:
-  * IP Geolocation databases (MaxMind, IP2Location) map IP blocks to **ISP regional routing hubs or city center centroids**—never physical rooftops.
-  * City-level accuracy ranges between 50–75%; street-level accuracy via pure IP is **0%**.
-* **How Physical Addresses are Actually Located**:
-  * **Wi-Fi BSSID Trilateration**: Querying nearby wireless router MAC addresses against war-driving databases (WiGLE / Skyhook) calculates rooftop locations down to **5–10 meters**.
-  * **OSINT & Data Breaches**: Chaining leaked delivery app databases, e-commerce records, and billing receipts.
-  * **ISP DHCP Subpoenas**: Correlating millisecond IP assignments directly with subscriber installation contracts.
+### 💻 02. Layer 2 vs. Layer 3 Frame Stripping
+Why your physical network card MAC address **never leaves your local router**:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant PC as 💻 Your PC (NIC)
+    participant Router as 🖧 Local Gateway (NAT)
+    participant Web as 🌐 Target Server (Internet)
+    Note over PC,Router: OSI Layer 2 Broadcast Domain
+    PC->>Router: Frame [Src MAC: 00:11:22.. | Dst MAC: Router_LAN_MAC]
+    Note over Router: ⚠️ ROUTER STRIPS ETHERNET FRAME & MAC
+    Note over Router,Web: OSI Layer 3 Public IP Routing
+    Router->>Web: Packet [Src IP: Router_Public_IP | Dst IP: Target_IP]
+    Note over Web: Server sees 0% of your PC's physical MAC
+```
 
 ---
 
-### 🔒 [04. VPN Mechanics, OPSEC & Provider Breakdown](./topics/04-vpn-mechanics-and-opsec/README.md)
-* **The Trust Shift Rule**: A VPN does not magically grant anonymity; it merely shifts trust from your local ISP to the VPN server operator.
-* **Commercial Providers (Proton / Nord) vs. Mullvad**:
-  * **Proton / Commercial**: Requires account registration (email/password), payment trails, and operates under legal jurisdictions that compel target IP logging (e.g. 2021 Swiss court orders).
-  * **Mullvad**: Anonymous 16-digit token generation (zero emails/passwords), cash-in-mail & Monero (XMR) support, diskless RAM-only infrastructure, and proven zero-log architecture verified during a real-world Swedish Police raid.
+### 🛰️ 03. Geolocation Reality vs. Rooftop Doxxing
+Why IP addresses only resolve to ISP regional aggregation nodes, while physical rooftop locations are found via Wi-Fi BSSID trilateration and data breaches:
 
+```mermaid
+flowchart TD
+    subgraph GeoIP_Limits["🌍 Pure IP Geolocation (MaxMind / IPinfo)"]
+        IP["🎯 Public IP Address"] --> Country["✅ Country Level (~99% Accurate)"]
+        IP --> City["⚠️ City Centroid (~60% Accurate)"]
+        IP --> Street["❌ Rooftop House Address (0% Impossible)"]
+    end
+
+    subgraph Real_Doxxing["🎯 How Exact Physical Houses Are Located"]
+        BSSID["📡 Wi-Fi BSSID Mapping (WiGLE / Skyhook 5-10m)"]
+        Breach["🗄️ Breached Delivery/Billing Records (OSINT)"]
+        ISP["📋 ISP DHCP Subpoena Logs (Exact Contract)"]
+    end
 ```
-+---------------------------------------------------------------------------------------+
-|                                THE 5-LAYER OPSEC STACK                                |
-|                                                                                       |
-|  [ LAYER 5 ]  Human Discipline & Zero Cross-Contamination (No personal account leaks) |
-|  [ LAYER 4 ]  Ephemeral Operating Systems (Tails OS / Qubes OS / Whonix)               |
-|  [ LAYER 3 ]  Anti-Fingerprinting Browser (Mullvad Browser / Tor Browser)             |
-|  [ LAYER 2 ]  Protocol Hardening (Encrypted DNS, WebRTC disabled, IPv6 disabled)      |
-|  [ LAYER 1 ]  Network Proxy (Mullvad WireGuard / Multi-Hop Tor)                       |
-+---------------------------------------------------------------------------------------+
+
+---
+
+### 🔒 04. The 5-Layer OPSEC Defense Stack
+An unbroken chain of operational security:
+
+```mermaid
+flowchart TD
+    L5["🛡️ <b>LAYER 5: Human Operational Discipline</b><br>Zero Cross-Contamination • No Personal Accounts • Disposable Burner Personas"]
+    L4["💻 <b>LAYER 4: Ephemeral Operating Systems</b><br>Tails OS (Amnesic RAM-only) • Qubes OS (Domain Isolation) • Whonix"]
+    L3["🌐 <b>LAYER 3: Anti-Fingerprinting Browsers</b><br>Mullvad Browser • Tor Browser (Uniform Canvas, WebGL & Audio Hashes)"]
+    L2["🔒 <b>LAYER 2: Protocol & Network Hardening</b><br>DNS-over-HTTPS (DoH) • WebRTC Disabled • IPv6 Dual-Stack Disabled"]
+    L1["⚡ <b>LAYER 1: Network Proxy Tunnel</b><br>Mullvad WireGuard (RAM-Only Diskless) • Multi-Hop Onion Routing"]
+
+    L5 --> L4 --> L3 --> L2 --> L1
 ```
+
+---
+
+## ⚖️ Provider Breakdown Matrix
+
+| Threat Vector | ⚠️ Commercial / Proton | 🛡️ Mullvad VPN |
+| :--- | :--- | :--- |
+| **Account Anchor** | ❌ Email / Password required | ✅ **Random 16-Digit Token (Zero KYC)** |
+| **Identity Footprint** | ❌ Tied to recovery inboxes & payment cards | ✅ **Zero personal data collected or stored** |
+| **Anonymous Payment** | ⚠️ Limited (Third-party KYC gateways) | ✅ **Cash in physical mail & Monero (XMR)** |
+| **Logging Architecture** | ❌ Subject to Swiss court logging orders | ✅ **Diskless RAM-only infrastructure** |
+| **Real-World Audit** | ❌ Documented user IP logs surrendered | ✅ **Swedish Police raid yielded 0 logs** |
+| **OPSEC Rating** | 🟥 **35% Anonymity** | 🟩 **98% Anonymity** |
 
 ---
 

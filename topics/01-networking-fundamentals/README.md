@@ -29,10 +29,10 @@ Understanding how data moves across Layer 2 and Layer 3 of the OSI model is mand
 * **Public IP**: A globally unique IP address assigned to your router/modem by your Internet Service Provider (ISP). Every machine directly communicating across the public internet uses public IPs.
 * **Private IP**: Non-routable IP addresses reserved exclusively for local area networks (LAN). They sit behind a router and cannot be contacted directly from the wider internet without port forwarding or tunneling.
 
-```
-[ Your PC: 192.168.1.50 ] ---\
-[ Phone:   192.168.1.51 ] ----+--> [ Router/Gateway: 192.168.1.1 ] ---> [ Public Internet: 203.0.113.42 ]
-[ Laptop:  192.168.1.52 ] ---/          (NAT Translation)
+```mermaid
+flowchart LR
+    A["💻 <b>Local PC</b><br><code>192.168.1.50</code><br><i>RFC 1918 Private</i>"] -->|"LAN Ethernet / Wi-Fi"| B["🖧 <b>NAT Gateway Router</b><br><code>192.168.1.1</code><br><i>Translates Port & IP</i>"]
+    B -->|"WAN Uplink"| C["🌐 <b>Public Internet</b><br><code>203.0.113.42</code><br><i>Sees Only Router Public IP</i>"]
 ```
 
 ### 1.2 RFC 1918 Private Address Ranges
@@ -46,7 +46,9 @@ These address blocks are reserved for private internal subnets:
 
 ### 1.3 NAT (Network Address Translation)
 Your router translates private internal IPs to your single public IP when you make outbound requests. It assigns an ephemeral source port on the public IP to track which internal device requested which packet.
-> **Security Implication**: External websites and remote observers only see your router's public IP and ephemeral source port. However, any adversary with access to your local Wi-Fi / LAN can inspect internal un-NATed traffic.
+
+> [!WARNING]
+> **Security Implication**: External websites only see your router's public IP. However, any adversary on your local LAN / Wi-Fi can inspect internal un-NATed traffic.
 
 ---
 
@@ -95,15 +97,13 @@ The gateway is the router interface connecting your local subnet to other subnet
 ### 4.1 How Resolution Works
 DNS converts human-readable domain names (`target.com`) into IP addresses (`93.184.216.34`).
 
-```
-[ Client ] -> [ Local DNS Cache / Hosts File ]
-                 | (Cache miss)
-                 v
-             [ Recursive Resolver (ISP / 1.1.1.1 / 8.8.8.8) ]
-                 |
-                 +---> [ Root Nameserver (.) ]
-                 +---> [ TLD Nameserver (.com) ]
-                 +---> [ Authoritative Nameserver (target.com) ]
+```mermaid
+flowchart TD
+    Client["💻 <b>Client Browser</b><br><i>Checks Local Cache & Hosts</i>"] -->|"1. Cache Miss"| Resolver["⚡ <b>Recursive Resolver</b><br><i>ISP / 1.1.1.1 / 8.8.8.8</i>"]
+    Resolver -->|"2. Query Root"| Root["🌐 <b>Root Server (.)</b>"]
+    Resolver -->|"3. Query TLD"| TLD["🏢 <b>TLD Server (.com)</b>"]
+    Resolver -->|"4. Query Auth"| Auth["🎯 <b>Authoritative Server (target.com)</b>"]
+    Auth -.->|"5. Returns IP 93.184.216.34"| Resolver -.->|"6. Resolved Address"| Client
 ```
 
 ### 4.2 Why Plaintext DNS Destroys Anonymity
