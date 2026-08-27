@@ -5,33 +5,40 @@
 
 [![Author](https://img.shields.io/badge/Author-draxo.dev-000000?style=for-the-badge&logo=github&logoColor=white)](https://draxo.dev)
 [![Topic](https://img.shields.io/badge/Focus-OPSEC%20%26%20Networking-000000?style=for-the-badge&logo=shield&logoColor=white)](#)
-[![Format](https://img.shields.io/badge/PDFs-Included-000000?style=for-the-badge&logo=adobe-acrobat-reader&logoColor=white)](./PDFs)
-[![Design](https://img.shields.io/badge/Style-Sharp%20Claymorphic%20PDF-000000?style=for-the-badge)](#)
+[![Request Topic](https://img.shields.io/badge/Request-New%20Topic-000000?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/DaddyZyn/Cyber-security-notes/issues/new?template=topic_request.yml)
+[![Contributions](https://img.shields.io/badge/PRs-Welcome-000000?style=for-the-badge)](./CONTRIBUTING.md)
 
 <p align="center">
-  <b>A comprehensive, no-bullshit technical field guide for security researchers, systems developers, and learners.</b><br>
-  <i>Written and published by <a href="https://draxo.dev"><b>draxo.dev</b></a></i>
+  <b>A structured, deep technical documentation repository for security researchers, systems developers, and learners.</b><br>
+  <i>Published and maintained by <a href="https://draxo.dev"><b>draxo.dev</b></a></i>
 </p>
 
 ---
 
 </div>
 
-## 📑 Curriculum & Documentation Modules
+## 💡 Request a Topic or Suggest Concepts
 
-| Module | Title | Core Focus Areas | PDF Export |
-| :--- | :--- | :--- | :---: |
-| **01** | **[Networking Fundamentals](./01_Networking_IPs_Subnets_DNS.md)** | Public vs. Private IPs, RFC 1918, NAT Translation, IPv4 vs. IPv6 Dual-Stack Leaks, Subnets (`/24`, `/16`), Gateways, DNS UDP 53 & DoH/DoT | [📥 View PDF](./PDFs/01_Networking_IPs_Subnets_DNS.pdf) |
-| **02** | **[Hardware Identifiers & MAC](./02_Hardware_Identifiers_MAC_Addresses.md)** | Layer 2 vs. Layer 3 Boundaries, Why MACs never leave routers, Captive Portals, Client-side WinAPI Telemetry (`GetAdaptersAddresses`), MAC Spoofing | [📥 View PDF](./PDFs/02_Hardware_Identifiers_MAC_Addresses.pdf) |
-| **03** | **[IP Tracking & Geolocation Realities](./03_IP_Tracking_Geolocation_Realities.md)** | How IPs are pulled (P2P, WebRTC STUN), The GeoIP Centroid Myth, **Wi-Fi BSSID Triangulation (WiGLE/Skyhook 5-10m)**, ISP DHCP Subpoenas, Data Breaches | [📥 View PDF](./PDFs/03_IP_Tracking_Geolocation_Realities.pdf) |
-| **04** | **[VPN Mechanics & OPSEC Threat Model](./04_VPN_Mechanics_OPSEC_Provider_Breakdown.md)** | TUN/TAP Adapters, Kernel Routing, The Trust Shift Rule, VPN Leak Vectors, **Commercial Traps (Proton/Nord KYC & Legal Logs) vs. Mullvad (16-Digit Zero-Data & Police Raid)** | [📥 View PDF](./PDFs/04_VPN_Mechanics_OPSEC_Provider_Breakdown.pdf) |
-| **📖** | **[Master Field Guide Compilation](./Cybersecurity_Complete_Guide_draxo_dev.pdf)** | Full 14-page unified handbook with all modules, cover page, and visual diagrams | [📕 Download Complete Guide](./PDFs/Cybersecurity_Complete_Guide_draxo_dev.pdf) |
+Have a concept you want explained or documented in deep technical detail?
+* 👉 **[Open a Topic Request on GitHub Issues](https://github.com/DaddyZyn/Cyber-security-notes/issues/new?template=topic_request.yml)**
+* Or submit a pull request following our **[Contributing Guide](./CONTRIBUTING.md)**.
 
 ---
 
-## 🔍 Module Previews & Technical Breakdowns
+## 📑 Core Documentation Modules
 
-### 🌐 Module 01: Networking, IPs, Subnets & DNS
+| # | Topic Directory | Focus Areas | Quick Link |
+| :---: | :--- | :--- | :---: |
+| **01** | **[`01-networking-fundamentals`](./topics/01-networking-fundamentals/)** | Public vs. Private IPs, RFC 1918, NAT Translation, IPv4 vs. IPv6 Dual-Stack Leaks, Subnets (`/24`, `/16`), Gateways, DNS UDP 53 & DoH/DoT | [📖 Read Module](./topics/01-networking-fundamentals/README.md) |
+| **02** | **[`02-hardware-identifiers`](./topics/02-hardware-identifiers/)** | Layer 2 vs. Layer 3 Boundaries, Why MACs never leave routers, Captive Portals, Client-side WinAPI Telemetry (`GetAdaptersAddresses`), MAC Spoofing | [📖 Read Module](./topics/02-hardware-identifiers/README.md) |
+| **03** | **[`03-ip-tracking-and-geolocation`](./topics/03-ip-tracking-and-geolocation/)** | How IPs are pulled (P2P, WebRTC STUN), The GeoIP Centroid Myth, **Wi-Fi BSSID Triangulation (WiGLE/Skyhook 5-10m)**, ISP DHCP Subpoenas, Data Breaches | [📖 Read Module](./topics/03-ip-tracking-and-geolocation/README.md) |
+| **04** | **[`04-vpn-mechanics-and-opsec`](./topics/04-vpn-mechanics-and-opsec/)** | TUN/TAP Adapters, Kernel Routing, The Trust Shift Rule, VPN Leak Vectors, **Commercial Traps (Proton/Nord KYC & Legal Logs) vs. Mullvad (16-Digit Zero-Data & Police Raid)** | [📖 Read Module](./topics/04-vpn-mechanics-and-opsec/README.md) |
+
+---
+
+## 🔍 Module Overviews
+
+### 🌐 [01. Networking Fundamentals](./topics/01-networking-fundamentals/README.md)
 * **NAT (Network Address Translation)**: How private subnets (`192.168.x.x`, `10.x.x.x`, `172.16.x.x`) are multiplexed behind a single public IPv4 gateway via ephemeral source ports.
 * **The IPv6 Dual-Stack Trap**: Why VPN tunnels that only handle IPv4 expose your true identity through native IPv6 SLAAC address routing.
 * **Encrypted DNS vs. Plaintext**: Why standard UDP port 53 reveals every visited domain to ISPs despite HTTPS, and how DNS-over-HTTPS (DoH) / DNS-over-TLS (DoT) solve Layer 7 visibility.
@@ -42,7 +49,7 @@
 
 ---
 
-### 💻 Module 02: Hardware Identifiers & MAC Addresses
+### 💻 [02. Hardware Identifiers & MAC Addresses](./topics/02-hardware-identifiers/README.md)
 * **The Layer 2 vs. Layer 3 Hard Boundary**:
   * Ethernet frames (and MAC addresses) exist **strictly inside the local broadcast domain**.
   * Your router **strips off your PC's MAC address** and generates a brand-new Ethernet frame before forwarding packets across the WAN. Remote web servers and game servers **cannot** read your MAC from an incoming IP packet.
@@ -60,7 +67,7 @@
 
 ---
 
-### 🛰️ Module 03: IP Tracking, Geolocation Realities & House-Level Doxxing
+### 🛰️ [03. IP Tracking, Geolocation Realities & House-Level Doxxing](./topics/03-ip-tracking-and-geolocation/README.md)
 * **The GeoIP Myth**:
   * IP Geolocation databases (MaxMind, IP2Location) map IP blocks to **ISP regional routing hubs or city center centroids**—never physical rooftops.
   * City-level accuracy ranges between 50–75%; street-level accuracy via pure IP is **0%**.
@@ -71,7 +78,7 @@
 
 ---
 
-### 🔒 Module 04: VPN Mechanics, OPSEC & Provider Breakdown
+### 🔒 [04. VPN Mechanics, OPSEC & Provider Breakdown](./topics/04-vpn-mechanics-and-opsec/README.md)
 * **The Trust Shift Rule**: A VPN does not magically grant anonymity; it merely shifts trust from your local ISP to the VPN server operator.
 * **Commercial Providers (Proton / Nord) vs. Mullvad**:
   * **Proton / Commercial**: Requires account registration (email/password), payment trails, and operates under legal jurisdictions that compel target IP logging (e.g. 2021 Swiss court orders).
@@ -91,12 +98,9 @@
 
 ---
 
-## 🎨 PDF Edition Highlights
+## 🤝 Contributing
 
-All documentation modules are compiled into formatted PDF editions located in the [`/PDFs`](./PDFs) folder:
-* **Sharp Modern Claymorphism Design**: High-contrast white & black palette with 3D tactile elevation, inset illumination, and pill badges.
-* **Visual Architecture Graphs**: Metric bars, comparison scorecards, packet routing flows, and multi-tier DNS resolution diagrams.
-* **Zero Browser Cruft**: Native headless rendering with zero URL/timestamp watermarks.
+Contributions, corrections, and new module submissions are welcome. Please check **[`CONTRIBUTING.md`](./CONTRIBUTING.md)** for details on structure and formatting.
 
 ---
 

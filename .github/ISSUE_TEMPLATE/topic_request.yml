@@ -1,0 +1,39 @@
+name: "💡 Request a New Topic / Module"
+description: "Suggest a cybersecurity, networking, reverse engineering, or OPSEC topic to be documented."
+title: "[Topic Request]: "
+labels: ["topic-request", "documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for requesting a topic! We write deep, technical, low-level field notes and explanations.
+  - type: input
+    id: topic_name
+    attributes:
+      label: "Topic Title / Concept"
+      description: "What specific security topic or concept do you want explained?"
+      placeholder: "e.g., Process Hollowing Internals, Kerberoasting in Active Directory, Wi-Fi WPA3 Handshakes"
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: "Category"
+      options:
+        - "Network Protocols & Traffic Analysis"
+        - "Operating System & Kernel Internals"
+        - "Reverse Engineering & Memory Operations"
+        - "Offensive Tooling & Exploitation Theory"
+        - "OPSEC & Digital Anonymity"
+        - "Blue Team, Detection & Forensics"
+        - "Cryptography & Authentication"
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: "What specific questions or mechanics should be covered?"
+      description: "Describe what learners should understand after reading this topic."
+      placeholder: "e.g., How does the kernel switch between user mode and kernel mode during a syscall? What structures are modified in the PEB?"
+    validations:
+      required: true
