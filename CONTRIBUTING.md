@@ -1,6 +1,6 @@
 # Contributing & Topic Requests
 
-Welcome to **Cyber Security Notes** by [draxo.dev](https://draxo.dev). This repository is dedicated to providing high-quality, low-level technical documentation for learners, researchers, and systems engineers.
+Welcome to **Cyber Security Notes** by [DaddyZyn (DRAXO.dev)](https://github.com/DaddyZyn). This repository is dedicated to providing high-quality, low-level technical documentation for learners, researchers, and systems engineers.
 
 ---
 

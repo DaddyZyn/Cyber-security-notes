@@ -3,14 +3,14 @@
 # 🛡️ CYBERSECURITY & OPSEC FIELD NOTES
 ### *Low-Level Systems Architecture, Network Forensics & Adversarial Threat Modeling*
 
-[![Author](https://img.shields.io/badge/Author-draxo.dev-000000?style=for-the-badge&logo=github&logoColor=white)](https://draxo.dev)
+[![Author](https://img.shields.io/badge/Author-DaddyZyn%20%7C%20DRAXO.dev-000000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/DaddyZyn)
 [![Topic](https://img.shields.io/badge/Focus-OPSEC%20%26%20Networking-000000?style=for-the-badge&logo=shield&logoColor=white)](#)
 [![Request Topic](https://img.shields.io/badge/Request-New%20Topic-000000?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/DaddyZyn/Cyber-security-notes/issues/new?template=topic_request.yml)
 [![Contributions](https://img.shields.io/badge/PRs-Welcome-000000?style=for-the-badge)](./CONTRIBUTING.md)
 
 <p align="center">
   <b>A structured, deep technical documentation repository for security researchers, systems developers, and learners.</b><br>
-  <i>Published and maintained by <a href="https://draxo.dev"><b>draxo.dev</b></a></i>
+  <i>Published and maintained by <a href="https://github.com/DaddyZyn"><b>DaddyZyn (DRAXO.dev)</b></a></i>
 </p>
 
 ---
@@ -106,6 +106,6 @@ Contributions, corrections, and new module submissions are welcome. Please check
 
 ## ⚖️ License & Credits
 
-* **Author & Publisher**: [draxo.dev](https://draxo.dev)
+* **Author & Maintainer**: [DaddyZyn (DRAXO.dev)](https://github.com/DaddyZyn)
 * **Purpose**: Educational, defensive security research, and systems engineering documentation.
 * **Repository**: [https://github.com/DaddyZyn/Cyber-security-notes](https://github.com/DaddyZyn/Cyber-security-notes)

@@ -124,5 +124,5 @@ A **DNS Leak** occurs when your VPN routes normal internet traffic through the e
 ---
 
 <div align="center">
-  <sub>Published and maintained by <a href="https://draxo.dev"><b>draxo.dev</b></a></sub>
+  <sub>Published and maintained by <a href="https://github.com/DaddyZyn"><b>DaddyZyn (DRAXO.dev)</b></a></sub>
 </div>
