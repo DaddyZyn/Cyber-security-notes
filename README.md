@@ -35,6 +35,7 @@ Have a concept you want explained or documented in deep technical detail?
 | **04** | **[`04-vpn-mechanics-and-opsec`](./topics/04-vpn-mechanics-and-opsec/)** | TUN/TAP Adapters, Kernel Routing, The Trust Shift Rule, VPN Leak Vectors, **Commercial Traps (Proton/Nord KYC & Legal Logs) vs. Mullvad (16-Digit Zero-Data & Police Raid)** | [📖 Read Module](./topics/04-vpn-mechanics-and-opsec/README.md) |
 | **05** | **[`05-phone-numbers-osint-and-larp-defense`](./topics/05-phone-numbers-osint-and-larp-defense/)** | Fake Doxxer & Larper Bluffs, Telecom SS7/HLR Reality vs. Public OSINT, Truecaller/Eyecon Sync Scrapes, **SIM Swapping Defense, Carrier Port-Out PINs, Non-SMS 2FA** | [📖 Read Module](./topics/05-phone-numbers-osint-and-larp-defense/README.md) |
 | **06** | **[`06-wireshark-stun-p2p-sniffing-and-app-hardening`](./topics/06-wireshark-stun-p2p-sniffing-and-app-hardening/)** | P2P Media Streams vs. Server Relays, **Wireshark Filters (`stun.type == 0x0001`, `0x0101`, `XOR-MAPPED-ADDRESS`)**, Hardening Settings for **WhatsApp, Telegram, Signal, Discord, Steam SDR** | [📖 Read Module](./topics/06-wireshark-stun-p2p-sniffing-and-app-hardening/README.md) |
+| **07** | **[`07-legacy-exploits-ip-harvesting-and-lan-attacks`](./topics/07-legacy-exploits-ip-harvesting-and-lan-attacks/)** | **Forced SMB / UNC Path NTLMv2 Leaks (Port 445)**, **LLMNR & NetBIOS Name Poisoning (Responder)**, BitTorrent DHT IP Scraping, Email Header/Pixel Leaks, Legacy IRC DCC | [📖 Read Module](./topics/07-legacy-exploits-ip-harvesting-and-lan-attacks/README.md) |
 
 ---
 
@@ -70,68 +71,33 @@ sequenceDiagram
 
 ---
 
-### 🛰️ 03. Geolocation Reality vs. Rooftop Doxxing
-Why IP addresses only resolve to ISP regional aggregation nodes, while physical rooftop locations are found via Wi-Fi BSSID trilateration and data breaches:
+### ⚔️ 07. Forced Outbound SMB / UNC Path Exploitation
+How a simple UNC file path (`\\attacker-ip\share`) forces unhardened Windows machines to initiate an outbound SMB connection and surrender their NetNTLMv2 hash:
 
 ```mermaid
-flowchart TD
-    subgraph GeoIP_Limits["🌍 Pure IP Geolocation (MaxMind / IPinfo)"]
-        IP["🎯 Public IP Address"] --> Country["✅ Country Level (~99% Accurate)"]
-        IP --> City["⚠️ City Centroid (~60% Accurate)"]
-        IP --> Street["❌ Rooftop House Address (0% Impossible)"]
-    end
-
-    subgraph Real_Doxxing["🎯 How Exact Physical Houses Are Located"]
-        BSSID["📡 Wi-Fi BSSID Mapping (WiGLE / Skyhook 5-10m)"]
-        Breach["🗄️ Breached Delivery/Billing Records (OSINT)"]
-        ISP["📋 ISP DHCP Subpoena Logs (Exact Contract)"]
-    end
+sequenceDiagram
+    autonumber
+    participant Victim as 💻 Victim Windows Machine
+    participant Attacker as 🖧 Attacker Server (Port 445 / Responder)
+    Note over Victim: Triggers UNC Path (HTML, Word Doc, Shortcut icon)
+    Victim->>Attacker: TCP Connection on Port 445 (SMB)
+    Attacker->>Victim: SMB Negotiate Response + NTLM Challenge
+    Victim->>Attacker: NTLMSSP_AUTH (Username + Domain + NetNTLMv2 Hash)
+    Note over Attacker: 🎯 Attacker harvests Public IP and Password Hash!
 ```
 
 ---
 
-### 🔒 04. The 5-Layer OPSEC Defense Stack
-An unbroken chain of operational security:
+## 🔒 App & Network Hardening Summary Matrix
 
-```mermaid
-flowchart TD
-    L5["🛡️ <b>LAYER 5: Human Operational Discipline</b><br>Zero Cross-Contamination • No Personal Accounts • Disposable Burner Personas"]
-    L4["💻 <b>LAYER 4: Ephemeral Operating Systems</b><br>Tails OS (Amnesic RAM-only) • Qubes OS (Domain Isolation) • Whonix"]
-    L3["🌐 <b>LAYER 3: Anti-Fingerprinting Browsers</b><br>Mullvad Browser • Tor Browser (Uniform Canvas, WebGL & Audio Hashes)"]
-    L2["🔒 <b>LAYER 2: Protocol & Network Hardening</b><br>DNS-over-HTTPS (DoH) • WebRTC Disabled • IPv6 Dual-Stack Disabled"]
-    L1["⚡ <b>LAYER 1: Network Proxy Tunnel</b><br>Mullvad WireGuard (RAM-Only Diskless) • Multi-Hop Onion Routing"]
-
-    L5 --> L4 --> L3 --> L2 --> L1
-```
-
----
-
-### 🦈 05 & 06. P2P Sniffing vs. Server Relayed Calls
-How direct media streams leak public IPs in Wireshark STUN captures vs. hardened server-relayed calls:
-
-```mermaid
-flowchart TD
-    subgraph Vulnerable_P2P["❌ Vulnerable: Direct P2P Call"]
-        P1["📱 Caller"] <-->|"Direct UDP Stream (Wireshark STUN Sniffable)"| P2["📱 Recipient (IP Exposed)"]
-    end
-
-    subgraph Hardened_Relayed["🛡️ Hardened: WhatsApp / Telegram Server Relay"]
-        H1["📱 Caller"] <-->|"Encrypted Tunnel"| Srv["⚡ Meta / Telegram Media Gateway"]
-        Srv <-->|"Encrypted Tunnel"| H2["📱 Recipient (IP Hidden)"]
-    end
-```
-
----
-
-## 🔒 App Hardening Quick-Settings Matrix
-
-| Application | Vulnerable Default? | Required Privacy Setting | Resulting Protection |
+| Protocol / Vector | Vulnerable Default? | Required Hardening Setting | Resulting Protection |
 | :--- | :---: | :--- | :--- |
-| **WhatsApp** | ⚠️ Yes (P2P on 1-on-1) | Settings ➔ Privacy ➔ Advanced ➔ **Protect IP Address in Calls** | 🛡️ Relayed via Meta Servers |
-| **Telegram** | ⚠️ Yes (P2P enabled) | Settings ➔ Privacy ➔ Calls ➔ **Peer-to-Peer: NOBODY** | 🛡️ Relayed via Telegram Servers |
-| **Signal** | ⚠️ Yes (Direct P2P) | Settings ➔ Privacy ➔ Advanced ➔ **Always Relay Calls** | 🛡️ Relayed via Signal Servers |
-| **Discord** | 🛡️ Safe on Voice | Keep official client & avoid untrusted external links | 🛡️ Centralized Gateway Default |
-| **Steam Games** | ⚠️ Depends on Game | Steam Settings ➔ In-Game ➔ **Steam Networking: Always Relay** | 🛡️ SDR Datagram Relay |
+| **WhatsApp Calls** | ⚠️ Yes (P2P on 1-on-1) | Settings ➔ Privacy ➔ Advanced ➔ **Protect IP Address in Calls** | 🛡️ Relayed via Meta Servers |
+| **Telegram Calls** | ⚠️ Yes (P2P enabled) | Settings ➔ Privacy ➔ Calls ➔ **Peer-to-Peer: NOBODY** | 🛡️ Relayed via Telegram Servers |
+| **Signal Calls** | ⚠️ Yes (Direct P2P) | Settings ➔ Privacy ➔ Advanced ➔ **Always Relay Calls** | 🛡️ Relayed via Signal Servers |
+| **Outbound SMB (445)** | ⚠️ Yes (Windows auto-connects) | Block Port 445 Outbound on Firewall; Restrict Outbound NTLM in GPO | 🛡️ Prevents Forced Hash Leaks |
+| **Local LLMNR / NetBIOS** | ⚠️ Yes (Multicast broadcast) | GPO: Turn off Multicast Name Resolution; Disable NetBIOS in WINS | 🛡️ Immune to Responder Poisoning |
+| **Torrent Swarms** | ⚠️ Yes (Public DHT announce) | qBittorrent ➔ Options ➔ Advanced ➔ **Bind to VPN Network Interface** | 🛡️ Zero Fallback Leaks |
 
 ---
 
