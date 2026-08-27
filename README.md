@@ -38,73 +38,70 @@ Have a concept you want explained or documented in deep technical detail?
 | **07** | **[`07-legacy-exploits-ip-harvesting-and-lan-attacks`](./topics/07-legacy-exploits-ip-harvesting-and-lan-attacks/)** | **Forced SMB / UNC Path NTLMv2 Leaks (Port 445)**, **LLMNR & NetBIOS Name Poisoning (Responder)**, BitTorrent DHT IP Scraping, Email Header/Pixel Leaks, Legacy IRC DCC | [📖 Read Module](./topics/07-legacy-exploits-ip-harvesting-and-lan-attacks/README.md) |
 | **08** | **[`08-arp-poisoning-mitm-and-packet-interception`](./topics/08-arp-poisoning-mitm-and-packet-interception/)** | **ARP Cache Poisoning Mechanics**, Gratuitous ARP Spoofing (`arpspoof`), **SSL/TLS Stripping (sslstrip)**, Wireshark Alerts (`arp.duplicate-address-frame`), Static ARP & DAI | [📖 Read Module](./topics/08-arp-poisoning-mitm-and-packet-interception/README.md) |
 | **09** | **[`09-tcp-handshake-exploits-rst-injection-and-scanning`](./topics/09-tcp-handshake-exploits-rst-injection-and-scanning/)** | **TCP 3-Way Handshake (ISN/SEQ/ACK)**, **SYN Flood DoS Attacks & SYN Cookies**, **TCP RST Injection / Connection Killing**, Nmap Scans (`-sT`, `-sS`, `-sF`, `-sX`), Port Scan Filters | [📖 Read Module](./topics/09-tcp-handshake-exploits-rst-injection-and-scanning/README.md) |
+| **10** | **[`10-dhcp-starvation-and-rogue-gateway-attacks`](./topics/10-dhcp-starvation-and-rogue-gateway-attacks/)** | **DHCP DORA (UDP 67/68)**, **DHCP Starvation via MAC Flooding (Yersinia)**, **Rogue DHCP Gateway Hijacking**, Wireshark Signatures, Switchport DHCP Snooping | [📖 Read Module](./topics/10-dhcp-starvation-and-rogue-gateway-attacks/README.md) |
+| **11** | **[`11-wifi-80211-deauth-wpa2-handshakes-and-pmkid`](./topics/11-wifi-80211-deauth-wpa2-handshakes-and-pmkid/)** | **802.11 Deauth Attack Mechanics (`aireplay-ng -0`)**, **WPA2 4-Way EAPOL Handshakes**, **Client-less PMKID Extraction**, GPU Hashcat Cracking (`-m 22000`), **802.11w PMF & WPA3** | [📖 Read Module](./topics/11-wifi-80211-deauth-wpa2-handshakes-and-pmkid/README.md) |
+| **12** | **[`12-dns-tunneling-covert-channels-and-exfiltration`](./topics/12-dns-tunneling-covert-channels-and-exfiltration/)** | **DNS Recursive Exfiltration**, Subdomain Label Chunking, **Bidirectional C2 via TXT Records (dnscat2 / iodine)**, Shannon Entropy Analysis, Wireshark Detection | [📖 Read Module](./topics/12-dns-tunneling-covert-channels-and-exfiltration/README.md) |
 
 ---
 
 ## 🔍 Visual Architecture Overviews
 
-### 🌐 01. Networking & NAT Translation Flow
-How private subnets (`192.168.x.x`) communicate across the public internet via Network Address Translation:
-
-```mermaid
-flowchart LR
-    A["💻 <b>Local Device</b><br><code>192.168.1.50</code><br><i>RFC 1918 Subnet</i>"] -->|"LAN Ethernet / Wi-Fi"| B["🖧 <b>NAT Gateway Router</b><br><code>192.168.1.1</code><br><i>Translates Port & IP</i>"]
-    B -->|"WAN Uplink"| C["🌐 <b>Public Internet / Target</b><br><code>203.0.113.42</code><br><i>Sees Only Router Public IP</i>"]
-```
-
----
-
-### ⚡ 08. ARP Cache Poisoning & Man-in-the-Middle Flow
-How an attacker sends unauthenticated Gratuitous ARP replies to force all LAN traffic through their network interface:
+### 📡 11. Wi-Fi 802.11 Deauthentication & Handshake Sniffing Flow
+Why unencrypted management frames in WPA2 allow attackers to forge deauth frames and capture 4-way handshakes:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Victim as 💻 Victim PC (192.168.1.50)
-    participant Attacker as 🖧 Attacker (192.168.1.100)
-    participant Router as 🌐 Gateway Router (192.168.1.1)
+    participant Victim as 📱 Victim Client (STA)
+    participant Attacker as 🕵️ Attacker (Monitor Mode)
+    participant AP as 📡 Wi-Fi Access Point
 
-    Attacker->>Victim: ARP Reply: "192.168.1.1 is at Attacker_MAC"
-    Attacker->>Router: ARP Reply: "192.168.1.50 is at Attacker_MAC"
-    Note over Victim,Router: ⚠️ Full MITM Established: All traffic passes through Attacker
-    Victim->>Attacker: Web Request (Destination: Router)
-    Note over Attacker: Attacker sniffs / strips SSL
-    Attacker->>Router: Forwards Web Request to Internet
+    Note over Attacker: Attacker sends forged unencrypted 802.11 frame
+    Attacker->>Victim: 802.11 Deauth [Src: AP_BSSID | Dst: Victim_MAC]
+    Note over Victim: 💥 Victim disconnects from Wi-Fi!
+    Note over Victim,AP: Victim automatically reconnects
+    AP->>Victim: EAPOL Msg 1 (ANonce)
+    Victim->>AP: EAPOL Msg 2 (SNonce + MIC)
+    AP->>Victim: EAPOL Msg 3 (GTK)
+    Victim->>AP: EAPOL Msg 4 (ACK)
+    Note over Attacker: 🎯 Attacker captures 4 EAPOL frames ➔ Cracks offline with Hashcat!
 ```
 
 ---
 
-### 🎯 09. TCP 3-Way Handshake vs. SYN Flood DoS
-How legitimate TCP connections establish state vs. how SYN Floods exhaust server kernel backlog memory:
+### 🚇 12. DNS Recursive Tunneling & Data Exfiltration
+How malware tunnels stolen data and C2 commands through corporate perimeter firewalls via recursive DNS queries:
 
 ```mermaid
-flowchart TD
-    subgraph Legitimate_Handshake["✅ Normal TCP 3-Way Handshake"]
-        C["💻 Client"] -->|"1. SYN (ISN)"| S["🌐 Server"]
-        S -->|"2. SYN-ACK (Server_ISN, ACK)"| C
-        C -->|"3. ACK"| S
-    end
+sequenceDiagram
+    autonumber
+    participant Malware as 💻 Compromised Host (Internal LAN)
+    participant CorpDNS as 🖧 Corporate DNS Server
+    participant C2 as 🖧 Attacker Authoritative NS (c2domain.com)
 
-    subgraph SYN_Flood_DoS["❌ SYN Flood Denial of Service"]
-        A["🖧 Attacker (Spoofed IPs)"] -->|"Floods 100,000 SYNs/sec"| Srv["🌐 Target Server"]
-        Srv -->|"Backlog Queue: FULL (100% Memory)"| Dropped["❌ Legitimate Users Dropped"]
-    end
+    Note over Malware: Base32-encodes stolen payload into subdomains
+    Malware->>CorpDNS: Query: "48657850617373.c2domain.com"
+    CorpDNS->>C2: Recursively forwards query through Firewall
+    Note over C2: 🎯 Attacker decodes: "HexPass"
+    C2->>CorpDNS: Returns DNS Response (TXT: "EXEC_WHOAMI")
+    CorpDNS->>Malware: Forwards Response (Delivers C2 Command!)
 ```
 
 ---
 
-## 🔒 App & Network Hardening Summary Matrix
+## 🔒 Complete Hardening & Defense Matrix
 
-| Protocol / Vector | Vulnerable Default? | Required Hardening Setting | Resulting Protection |
-| :--- | :---: | :--- | :--- |
-| **WhatsApp Calls** | ⚠️ Yes (P2P on 1-on-1) | Settings ➔ Privacy ➔ Advanced ➔ **Protect IP Address in Calls** | 🛡️ Relayed via Meta Servers |
-| **Telegram Calls** | ⚠️ Yes (P2P enabled) | Settings ➔ Privacy ➔ Calls ➔ **Peer-to-Peer: NOBODY** | 🛡️ Relayed via Telegram Servers |
-| **Signal Calls** | ⚠️ Yes (Direct P2P) | Settings ➔ Privacy ➔ Advanced ➔ **Always Relay Calls** | 🛡️ Relayed via Signal Servers |
-| **Outbound SMB (445)** | ⚠️ Yes (Windows auto-connects) | Block Port 445 Outbound on Firewall; Restrict Outbound NTLM in GPO | 🛡️ Prevents Forced Hash Leaks |
-| **Local LLMNR / NetBIOS** | ⚠️ Yes (Multicast broadcast) | GPO: Turn off Multicast Name Resolution; Disable NetBIOS in WINS | 🛡️ Immune to Responder Poisoning |
-| **Local ARP Spoofing** | ⚠️ Yes (Stateless unauthenticated ARP) | Dynamic ARP Inspection (DAI) on switch / Static ARP / VPN Tunnel | 🛡️ Immune to MITM Sniffing |
-| **TCP SYN Flooding** | ⚠️ Yes (Backlog exhaustion) | Enable Kernel **SYN Cookies** (`tcp_syncookies = 1`) | 🛡️ Stateless Handshake Protection |
-| **Torrent Swarms** | ⚠️ Yes (Public DHT announce) | qBittorrent ➔ Options ➔ Advanced ➔ **Bind to VPN Network Interface** | 🛡️ Zero Fallback Leaks |
+| Attack Vector | Layer | Vulnerable Default? | Required Hardening Countermeasure |
+| :--- | :---: | :---: | :--- |
+| **ARP Cache Poisoning** | Layer 2 | ⚠️ Yes | Dynamic ARP Inspection (DAI) / Static ARP / Encrypted VPN |
+| **DHCP Starvation / Rogue Srv** | Layer 2/3 | ⚠️ Yes | Switchport **DHCP Snooping** + Port Security limits |
+| **Wi-Fi 802.11 Deauth** | Layer 2 (802.11) | ⚠️ Yes (WPA2) | Enable **802.11w Protected Management Frames (PMF)** / WPA3 |
+| **WPA2 Handshake Cracking** | Layer 2 (802.11) | ⚠️ Yes | Complex 20+ char random passphrase / Upgrade to WPA3-SAE |
+| **DNS Tunneling / Exfiltration** | Layer 7 (UDP 53) | ⚠️ Yes | Internal DNS sinkholing, Query Length Limits, Subdomain Entropy rules |
+| **Forced Outbound SMB** | Layer 7 (TCP 445) | ⚠️ Yes | Block Port 445 Outbound; Restrict Outbound NTLM via GPO |
+| **LLMNR / NetBIOS Spoofing** | Layer 2/3 | ⚠️ Yes | Turn off Multicast Name Resolution in GPO; Disable NetBIOS in WINS |
+| **WhatsApp / Telegram P2P** | Layer 7 (VoIP) | ⚠️ Yes | Enable **"Protect IP in Calls"** (WhatsApp) / Peer-to-Peer: **Nobody** (Telegram) |
+| **Torrent Swarm IP Leaks** | Layer 7 (P2P) | ⚠️ Yes | Bind qBittorrent network interface strictly to VPN adapter |
 
 ---
 
