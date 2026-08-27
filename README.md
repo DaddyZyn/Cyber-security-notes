@@ -4,7 +4,7 @@
 ### *Low-Level Systems Architecture, Network Forensics & Adversarial Threat Modeling*
 
 [![Author](https://img.shields.io/badge/Author-DaddyZyn%20%7C%20DRAXO.dev-000000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/DaddyZyn)
-[![Topic](https://img.shields.io/badge/Focus-OPSEC%20%26%20Networking-000000?style=for-the-badge&logo=shield&logoColor=white)](#)
+[![Topic](https://img.shields.io/badge/Focus-Networking%20%26%20Exploits-000000?style=for-the-badge&logo=shield&logoColor=white)](#)
 [![Request Topic](https://img.shields.io/badge/Request-New%20Topic-000000?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/DaddyZyn/Cyber-security-notes/issues/new?template=topic_request.yml)
 [![Contributions](https://img.shields.io/badge/PRs-Welcome-000000?style=for-the-badge)](./CONTRIBUTING.md)
 
@@ -36,6 +36,8 @@ Have a concept you want explained or documented in deep technical detail?
 | **05** | **[`05-phone-numbers-osint-and-larp-defense`](./topics/05-phone-numbers-osint-and-larp-defense/)** | Fake Doxxer & Larper Bluffs, Telecom SS7/HLR Reality vs. Public OSINT, Truecaller/Eyecon Sync Scrapes, **SIM Swapping Defense, Carrier Port-Out PINs, Non-SMS 2FA** | [📖 Read Module](./topics/05-phone-numbers-osint-and-larp-defense/README.md) |
 | **06** | **[`06-wireshark-stun-p2p-sniffing-and-app-hardening`](./topics/06-wireshark-stun-p2p-sniffing-and-app-hardening/)** | P2P Media Streams vs. Server Relays, **Wireshark Filters (`stun.type == 0x0001`, `0x0101`, `XOR-MAPPED-ADDRESS`)**, Hardening Settings for **WhatsApp, Telegram, Signal, Discord, Steam SDR** | [📖 Read Module](./topics/06-wireshark-stun-p2p-sniffing-and-app-hardening/README.md) |
 | **07** | **[`07-legacy-exploits-ip-harvesting-and-lan-attacks`](./topics/07-legacy-exploits-ip-harvesting-and-lan-attacks/)** | **Forced SMB / UNC Path NTLMv2 Leaks (Port 445)**, **LLMNR & NetBIOS Name Poisoning (Responder)**, BitTorrent DHT IP Scraping, Email Header/Pixel Leaks, Legacy IRC DCC | [📖 Read Module](./topics/07-legacy-exploits-ip-harvesting-and-lan-attacks/README.md) |
+| **08** | **[`08-arp-poisoning-mitm-and-packet-interception`](./topics/08-arp-poisoning-mitm-and-packet-interception/)** | **ARP Cache Poisoning Mechanics**, Gratuitous ARP Spoofing (`arpspoof`), **SSL/TLS Stripping (sslstrip)**, Wireshark Alerts (`arp.duplicate-address-frame`), Static ARP & DAI | [📖 Read Module](./topics/08-arp-poisoning-mitm-and-packet-interception/README.md) |
+| **09** | **[`09-tcp-handshake-exploits-rst-injection-and-scanning`](./topics/09-tcp-handshake-exploits-rst-injection-and-scanning/)** | **TCP 3-Way Handshake (ISN/SEQ/ACK)**, **SYN Flood DoS Attacks & SYN Cookies**, **TCP RST Injection / Connection Killing**, Nmap Scans (`-sT`, `-sS`, `-sF`, `-sX`), Port Scan Filters | [📖 Read Module](./topics/09-tcp-handshake-exploits-rst-injection-and-scanning/README.md) |
 
 ---
 
@@ -52,38 +54,41 @@ flowchart LR
 
 ---
 
-### 💻 02. Layer 2 vs. Layer 3 Frame Stripping
-Why your physical network card MAC address **never leaves your local router**:
+### ⚡ 08. ARP Cache Poisoning & Man-in-the-Middle Flow
+How an attacker sends unauthenticated Gratuitous ARP replies to force all LAN traffic through their network interface:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant PC as 💻 Your PC (NIC)
-    participant Router as 🖧 Local Gateway (NAT)
-    participant Web as 🌐 Target Server (Internet)
-    Note over PC,Router: OSI Layer 2 Broadcast Domain
-    PC->>Router: Frame [Src MAC: 00:11:22.. | Dst MAC: Router_LAN_MAC]
-    Note over Router: ⚠️ ROUTER STRIPS ETHERNET FRAME & MAC
-    Note over Router,Web: OSI Layer 3 Public IP Routing
-    Router->>Web: Packet [Src IP: Router_Public_IP | Dst IP: Target_IP]
-    Note over Web: Server sees 0% of your PC's physical MAC
+    participant Victim as 💻 Victim PC (192.168.1.50)
+    participant Attacker as 🖧 Attacker (192.168.1.100)
+    participant Router as 🌐 Gateway Router (192.168.1.1)
+
+    Attacker->>Victim: ARP Reply: "192.168.1.1 is at Attacker_MAC"
+    Attacker->>Router: ARP Reply: "192.168.1.50 is at Attacker_MAC"
+    Note over Victim,Router: ⚠️ Full MITM Established: All traffic passes through Attacker
+    Victim->>Attacker: Web Request (Destination: Router)
+    Note over Attacker: Attacker sniffs / strips SSL
+    Attacker->>Router: Forwards Web Request to Internet
 ```
 
 ---
 
-### ⚔️ 07. Forced Outbound SMB / UNC Path Exploitation
-How a simple UNC file path (`\\attacker-ip\share`) forces unhardened Windows machines to initiate an outbound SMB connection and surrender their NetNTLMv2 hash:
+### 🎯 09. TCP 3-Way Handshake vs. SYN Flood DoS
+How legitimate TCP connections establish state vs. how SYN Floods exhaust server kernel backlog memory:
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    participant Victim as 💻 Victim Windows Machine
-    participant Attacker as 🖧 Attacker Server (Port 445 / Responder)
-    Note over Victim: Triggers UNC Path (HTML, Word Doc, Shortcut icon)
-    Victim->>Attacker: TCP Connection on Port 445 (SMB)
-    Attacker->>Victim: SMB Negotiate Response + NTLM Challenge
-    Victim->>Attacker: NTLMSSP_AUTH (Username + Domain + NetNTLMv2 Hash)
-    Note over Attacker: 🎯 Attacker harvests Public IP and Password Hash!
+flowchart TD
+    subgraph Legitimate_Handshake["✅ Normal TCP 3-Way Handshake"]
+        C["💻 Client"] -->|"1. SYN (ISN)"| S["🌐 Server"]
+        S -->|"2. SYN-ACK (Server_ISN, ACK)"| C
+        C -->|"3. ACK"| S
+    end
+
+    subgraph SYN_Flood_DoS["❌ SYN Flood Denial of Service"]
+        A["🖧 Attacker (Spoofed IPs)"] -->|"Floods 100,000 SYNs/sec"| Srv["🌐 Target Server"]
+        Srv -->|"Backlog Queue: FULL (100% Memory)"| Dropped["❌ Legitimate Users Dropped"]
+    end
 ```
 
 ---
@@ -97,6 +102,8 @@ sequenceDiagram
 | **Signal Calls** | ⚠️ Yes (Direct P2P) | Settings ➔ Privacy ➔ Advanced ➔ **Always Relay Calls** | 🛡️ Relayed via Signal Servers |
 | **Outbound SMB (445)** | ⚠️ Yes (Windows auto-connects) | Block Port 445 Outbound on Firewall; Restrict Outbound NTLM in GPO | 🛡️ Prevents Forced Hash Leaks |
 | **Local LLMNR / NetBIOS** | ⚠️ Yes (Multicast broadcast) | GPO: Turn off Multicast Name Resolution; Disable NetBIOS in WINS | 🛡️ Immune to Responder Poisoning |
+| **Local ARP Spoofing** | ⚠️ Yes (Stateless unauthenticated ARP) | Dynamic ARP Inspection (DAI) on switch / Static ARP / VPN Tunnel | 🛡️ Immune to MITM Sniffing |
+| **TCP SYN Flooding** | ⚠️ Yes (Backlog exhaustion) | Enable Kernel **SYN Cookies** (`tcp_syncookies = 1`) | 🛡️ Stateless Handshake Protection |
 | **Torrent Swarms** | ⚠️ Yes (Public DHT announce) | qBittorrent ➔ Options ➔ Advanced ➔ **Bind to VPN Network Interface** | 🛡️ Zero Fallback Leaks |
 
 ---
