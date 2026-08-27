@@ -41,50 +41,47 @@ Have a concept you want explained or documented in deep technical detail?
 | **10** | **[`10-dhcp-starvation-and-rogue-gateway-attacks`](./topics/10-dhcp-starvation-and-rogue-gateway-attacks/)** | **DHCP DORA (UDP 67/68)**, **DHCP Starvation via MAC Flooding (Yersinia)**, **Rogue DHCP Gateway Hijacking**, Wireshark Signatures, Switchport DHCP Snooping | [📖 Read Module](./topics/10-dhcp-starvation-and-rogue-gateway-attacks/README.md) |
 | **11** | **[`11-wifi-80211-deauth-wpa2-handshakes-and-pmkid`](./topics/11-wifi-80211-deauth-wpa2-handshakes-and-pmkid/)** | **802.11 Deauth Attack Mechanics (`aireplay-ng -0`)**, **WPA2 4-Way EAPOL Handshakes**, **Client-less PMKID Extraction**, GPU Hashcat Cracking (`-m 22000`), **802.11w PMF & WPA3** | [📖 Read Module](./topics/11-wifi-80211-deauth-wpa2-handshakes-and-pmkid/README.md) |
 | **12** | **[`12-dns-tunneling-covert-channels-and-exfiltration`](./topics/12-dns-tunneling-covert-channels-and-exfiltration/)** | **DNS Recursive Exfiltration**, Subdomain Label Chunking, **Bidirectional C2 via TXT Records (dnscat2 / iodine)**, Shannon Entropy Analysis, Wireshark Detection | [📖 Read Module](./topics/12-dns-tunneling-covert-channels-and-exfiltration/README.md) |
+| **13** | **[`13-pentesting-tool-internals-and-mechanics`](./topics/13-pentesting-tool-internals-and-mechanics/)** | **Wireshark/Npcap Ring Buffers & BPF Bytecode**, **Nmap Raw Sockets (`SOCK_RAW`) & OS Fingerprinting**, **Metasploit Reflective DLL Injection & Meterpreter TLV**, **Burp Suite Dynamic Root CA Proxy**, **Hashcat CUDA Compute Shaders** | [📖 Read Module](./topics/13-pentesting-tool-internals-and-mechanics/README.md) |
 
 ---
 
 ## 🔍 Visual Architecture Overviews
 
-### 📡 11. Wi-Fi 802.11 Deauthentication & Handshake Sniffing Flow
-Why unencrypted management frames in WPA2 allow attackers to forge deauth frames and capture 4-way handshakes:
+### ⚙️ 13. Metasploit Staged Payload & Reflective DLL Injection
+How Metasploit exploits inject tiny stagers to pull down 100% in-memory (fileless) Meterpreter stages without touching the physical disk:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Victim as 📱 Victim Client (STA)
-    participant Attacker as 🕵️ Attacker (Monitor Mode)
-    participant AP as 📡 Wi-Fi Access Point
+    participant Attacker as 🖧 Metasploit Handler (msfconsole)
+    participant Target as 💻 Target Process (Exploited Buffer)
 
-    Note over Attacker: Attacker sends forged unencrypted 802.11 frame
-    Attacker->>Victim: 802.11 Deauth [Src: AP_BSSID | Dst: Victim_MAC]
-    Note over Victim: 💥 Victim disconnects from Wi-Fi!
-    Note over Victim,AP: Victim automatically reconnects
-    AP->>Victim: EAPOL Msg 1 (ANonce)
-    Victim->>AP: EAPOL Msg 2 (SNonce + MIC)
-    AP->>Victim: EAPOL Msg 3 (GTK)
-    Victim->>AP: EAPOL Msg 4 (ACK)
-    Note over Attacker: 🎯 Attacker captures 4 EAPOL frames ➔ Cracks offline with Hashcat!
+    Note over Attacker,Target: 1. Exploit delivers tiny Stager (~250 bytes)
+    Attacker->>Target: Injects Stager into memory
+    Target->>Attacker: Stager executes ➔ Connects back (Reverse TCP:4444)
+    Note over Attacker: 2. Handler streams full Meterpreter DLL stage
+    Attacker->>Target: Streams 1 MB Meterpreter DLL over socket
+    Note over Target: ReflectiveLoader() maps DLL directly in RAM (Zero Disk Footprint!)
 ```
 
 ---
 
-### 🚇 12. DNS Recursive Tunneling & Data Exfiltration
-How malware tunnels stolen data and C2 commands through corporate perimeter firewalls via recursive DNS queries:
+### 🛡️ 13. Burp Suite Dynamic CA Interception Proxy
+How Burp Suite intercepts and decrypts encrypted HTTPS traffic using dynamically signed certificates:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Malware as 💻 Compromised Host (Internal LAN)
-    participant CorpDNS as 🖧 Corporate DNS Server
-    participant C2 as 🖧 Attacker Authoritative NS (c2domain.com)
+    participant Browser as 🌐 Client Browser
+    participant Burp as 🛡️ Burp Suite Proxy (Port 8080)
+    participant Server as 🌐 Real Web Server
 
-    Note over Malware: Base32-encodes stolen payload into subdomains
-    Malware->>CorpDNS: Query: "48657850617373.c2domain.com"
-    CorpDNS->>C2: Recursively forwards query through Firewall
-    Note over C2: 🎯 Attacker decodes: "HexPass"
-    C2->>CorpDNS: Returns DNS Response (TXT: "EXEC_WHOAMI")
-    CorpDNS->>Malware: Forwards Response (Delivers C2 Command!)
+    Browser->>Burp: TLS Client Hello (target.com)
+    Note over Burp: Burp generates forged SSL Cert signed by Burp Root CA
+    Burp->>Browser: TLS Handshake Completed (Decrypted Stream 1)
+    Burp->>Server: Separate TLS Handshake to Real Server (Decrypted Stream 2)
+    Browser->>Burp: Sends HTTP Request (Plaintext in Burp UI)
+    Burp->>Server: Forwards modified HTTP Request over TLS Stream 2
 ```
 
 ---
@@ -100,6 +97,7 @@ sequenceDiagram
 | **DNS Tunneling / Exfiltration** | Layer 7 (UDP 53) | ⚠️ Yes | Internal DNS sinkholing, Query Length Limits, Subdomain Entropy rules |
 | **Forced Outbound SMB** | Layer 7 (TCP 445) | ⚠️ Yes | Block Port 445 Outbound; Restrict Outbound NTLM via GPO |
 | **LLMNR / NetBIOS Spoofing** | Layer 2/3 | ⚠️ Yes | Turn off Multicast Name Resolution in GPO; Disable NetBIOS in WINS |
+| **TCP SYN Flooding** | Layer 4 | ⚠️ Yes | Enable Kernel **SYN Cookies** (`tcp_syncookies = 1`) |
 | **WhatsApp / Telegram P2P** | Layer 7 (VoIP) | ⚠️ Yes | Enable **"Protect IP in Calls"** (WhatsApp) / Peer-to-Peer: **Nobody** (Telegram) |
 | **Torrent Swarm IP Leaks** | Layer 7 (P2P) | ⚠️ Yes | Bind qBittorrent network interface strictly to VPN adapter |
 
