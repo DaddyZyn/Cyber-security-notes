@@ -29,9 +29,9 @@ Rainbow Six Siege does not rely on a single defensive tool; it combines three mu
 
 ```mermaid
 flowchart TD
-    L1["Layer 1: Kernel Anti-Cheat (BattlEye)<br/>Handle Stripping • Unbacked Memory Scans"]
-    L2["Layer 2: Commercial Virtualization (VMProtect)<br/>Custom Bytecode • Stripped x64 Disassembly"]
-    L3["Layer 3: Game-Engine Pointer Encryption<br/>Encrypted EntityLists • Dynamic ROL/XOR Chains"]
+    L1["Layer 1: Kernel AC<br/>BattlEye Driver<br/>Handle Stripping<br/>Memory Scans"]
+    L2["Layer 2: VMProtect<br/>Custom Bytecode<br/>Stripped x64 ASM"]
+    L3["Layer 3: Encryption<br/>Encrypted Pointers<br/>Dynamic Decryption"]
 
     L1 --> L2 --> L3
 ```
@@ -69,13 +69,13 @@ The game engine applies a combination of bitwise operations to obfuscate 64-bit 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant RAM as Game Memory (Heap)
-    participant Engine as Decryption Function (In-Engine)
-    participant CPU as Real Virtual Memory Address
+    participant RAM as Game Memory
+    participant Engine as Decryption Func
+    participant CPU as Real Pointer
 
-    RAM->>Engine: Reads Encrypted QWORD (0xA9B8C7D6E5F40312)
-    Note over Engine: 1. ROR 17 bits<br/>2. XOR with 0x5F11A4BC<br/>3. SUB 0x2A50<br/>4. ROL 31 bits
-    Engine->>CPU: Yields Real Memory Pointer (0x7FF712504000)!
+    RAM->>Engine: Reads Encrypted QWORD
+    Note over Engine: 1. ROR 17 bits<br/>2. XOR 0x5F11A4BC<br/>3. SUB 0x2A50<br/>4. ROL 31 bits
+    Engine->>CPU: Yields Real Memory Pointer!
 ```
 
 ### 2.3 Seasonal Polymorphism (Patch Rotation)
@@ -93,12 +93,9 @@ Critical game subsystems in R6 (such as camera matrices, network synchronization
 
 ```mermaid
 flowchart TD
-    Orig["Original C++ Source Code<br/>(e.g., CalculateViewMatrix)"]
-    Compiler["Standard Compiler<br/>(Generates Native x64 Assembly)"]
-    VMP["VMProtect Processor<br/>Converts x64 to Proprietary Bytecode"]
-    Binary["Shipped R6 Binary<br/>Contains VM Interpreter + Bytecode"]
-
-    Orig --> Compiler --> VMP --> Binary
+    Orig["Original C++<br/>Source Code"] --> Compiler["Compiler<br/>(x64 ASM)"]
+    Compiler --> VMP["VMProtect<br/>(Custom Bytecode)"]
+    VMP --> Binary["Shipped Game<br/>(VM Interpreter)"]
 ```
 
 ### 3.2 The VM Dispatcher Loop

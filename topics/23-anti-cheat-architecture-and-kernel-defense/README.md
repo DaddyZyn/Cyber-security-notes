@@ -30,15 +30,15 @@ In early PC gaming (e.g. legacy Valve Anti-Cheat - VAC), the anti-cheat ran as a
 
 ```mermaid
 flowchart TD
-    App["External Tool / Injector<br/>(Ring 3 User Mode)"]
-    Game["Protected Game Process<br/>(Ring 3 User Mode)"]
-    Driver["Kernel Anti-Cheat Driver<br/>(Ring 0 Kernel Mode)"]
-    Hypervisor["Hypervisor / Vanguard<br/>(Ring -1 Virtualization)"]
+    App["External Tool<br/>(Ring 3)"]
+    Game["Game Process<br/>(Ring 3)"]
+    Driver["AC Driver<br/>(Ring 0)"]
+    Hypervisor["Hypervisor<br/>(Ring -1)"]
 
-    App -->|Attempts OpenProcess| Driver
-    Driver -->|Strips Handle Rights via ObRegisterCallbacks| App
-    Driver -->|Scans Memory & Integrity| Game
-    Hypervisor -->|Traps Page Modifications via EPT| Driver
+    App -->|OpenProcess| Driver
+    Driver -->|Strip Handle| App
+    Driver -->|Scan Memory| Game
+    Hypervisor -->|Trap EPT| Driver
 ```
 
 | Anti-Cheat System | Execution Level | Startup Model | Primary Target Games |
@@ -94,15 +94,15 @@ Advanced solutions (like Riot Vanguard) utilize hardware virtualization features
 
 ```mermaid
 flowchart TD
-    VMX["CPU Hypervisor Mode (Ring -1)"]
-    EPT["Extended Page Tables (EPT)<br/>Hardware Memory Translation Shadow"]
-    OS["Windows Kernel (Ring 0)"]
-    Game["Game Memory Space (Ring 3)"]
+    VMX["Hypervisor<br/>(Ring -1)"]
+    EPT["EPT Memory<br/>Shadow Pages"]
+    OS["Windows Kernel<br/>(Ring 0)"]
+    Game["Game Memory<br/>(Ring 3)"]
 
     VMX --> EPT
     EPT --> OS
     OS --> Game
-    Game -->|Memory Modification Trigger| Trap["VM-Exit Trap: Caught by Hypervisor!"]
+    Game -->|Modify Page| Trap["VM-Exit Trap<br/>Caught!"]
 ```
 
 ### 3.1 Extended Page Tables (EPT) Memory Shadowing

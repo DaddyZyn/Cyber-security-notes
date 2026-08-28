@@ -29,16 +29,16 @@ In an Active Directory domain, services (e.g. Microsoft SQL, IIS Web Servers, Fi
 ```mermaid
 sequenceDiagram
     autonumber
-    participant User as Domain User (Workstation)
-    participant KDC as Domain Controller (KDC / Kerberos)
-    participant Svc as Target Service (SQL Server)
+    participant User as Domain User
+    participant KDC as Domain Controller
+    participant Svc as Target Service
 
-    User->>KDC: 1. AS-REQ (Requests TGT with timestamp)
-    KDC->>User: 2. AS-REP (Returns TGT encrypted with krbtgt key)
-    User->>KDC: 3. TGS-REQ (Presents TGT + Requests SPN Ticket)
-    Note over KDC: KDC encrypts Service Ticket with Service Account's Password Hash!
-    KDC->>User: 4. TGS-REP (Delivers Encrypted Service Ticket)
-    User->>Svc: 5. AP-REQ (Presents Ticket ➔ Authenticated!)
+    User->>KDC: 1. AS-REQ (Auth)
+    KDC->>User: 2. AS-REP (TGT)
+    User->>KDC: 3. TGS-REQ (Service Req)
+    Note over KDC: Encrypts Ticket with<br/>Service Account Hash!
+    KDC->>User: 4. TGS-REP (Encrypted Ticket)
+    User->>Svc: 5. AP-REQ (Authenticated)
 ```
 
 * **TGT (Ticket Granting Ticket)**: Proves the user has authenticated to the domain.
@@ -56,12 +56,12 @@ By design in Kerberos:
 
 ```mermaid
 flowchart TD
-    User["Low-Privilege User Account<br/>(Valid Domain Member)"] -->|1. Queries LDAP for SPNs| DC["Domain Controller"]
-    DC -->|2. Returns List of Service Accounts| User
-    User -->|3. Requests TGS Ticket for SPN| DC
-    DC -->|4. Returns Ticket Encrypted with Service Hash| User
-    User -->|5. Exports Ticket Hash to File| GPU["Offline GPU Cracking<br/>(Hashcat -m 13100)"]
-    GPU --> Pwd["Plaintext Service Account Password Recovered!"]
+    User["Domain User<br/>(Valid Account)"] -->|1. LDAP Query| DC["Domain Controller"]
+    DC -->|2. SPN List| User
+    User -->|3. Request TGS| DC
+    DC -->|4. Encrypted Ticket| User
+    User -->|5. Export Hash| GPU["Offline Cracker<br/>(Hashcat -m 13100)"]
+    GPU --> Pwd["Plaintext Password<br/>Recovered!"]
 ```
 
 ### 2.2 Offline GPU Cracking with Hashcat (`-m 13100`)

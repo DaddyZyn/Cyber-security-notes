@@ -60,15 +60,14 @@ If you want to inject 30 lines of custom C++ / assembly logic into a function, y
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Orig as Original Function
-    participant Cave as Code Cave (Allocated Memory)
+    participant Orig as Original Func
+    participant Cave as Code Cave
 
-    Orig->>Orig: Normal Function Execution
-    Note over Orig: Hits 5-byte JMP to Code Cave
-    Orig->>Cave: Jumps to Code Cave!
-    Note over Cave: 1. pushfq & push general registers<br/>2. Execute custom logic<br/>3. pop general registers & popfq<br/>4. Execute stolen original instructions
-    Cave->>Orig: Jumps back to (Original Address + 5)
-    Note over Orig: Function resumes without crashing!
+    Orig->>Orig: Normal Execution
+    Note over Orig: Hits 5-byte JMP
+    Orig->>Cave: Jumps to Cave!
+    Note over Cave: 1. pushfq / push regs<br/>2. Custom logic<br/>3. pop regs / popfq<br/>4. Stolen bytes
+    Cave->>Orig: Jumps back (Orig + 5)
 ```
 
 ### 2.2 Static Padding Caves vs. Dynamic `VirtualAlloc` Caves

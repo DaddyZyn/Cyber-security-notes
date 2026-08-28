@@ -34,9 +34,9 @@ While virtual memory addresses shift, the **underlying machine code opcodes** ge
 
 ```mermaid
 flowchart TD
-    Update["Game Patch 1.1 Released<br/>Code shifted by +64 bytes"] --> Break["Hardcoded Offset: BROKEN (Crashes)"]
-    Update --> Scan["AOB Pattern Scanner<br/>Scans for unique opcode sequence"]
-    Scan --> Found["Locates Function at New Address:<br/>game.exe + 0x2A5440 (Automated Fix!)"]
+    Update["Patch 1.1<br/>Code Shifted"] --> Break["Hardcoded Offset<br/>BROKEN / Crashes"]
+    Update --> Scan["AOB Pattern Scan<br/>Opcode Signature"]
+    Scan --> Found["Finds Address<br/>Automatically!"]
 ```
 
 ---
@@ -74,15 +74,14 @@ To scan the target process without reading invalid memory pages (which triggers 
 sequenceDiagram
     autonumber
     participant Scanner as Scanner Engine
-    participant OS as Windows Kernel (VirtualQueryEx)
-    participant Memory as Target Memory Space
+    participant OS as VirtualQueryEx
+    participant Memory as Target Memory
 
-    Scanner->>OS: Query Memory at Address 0x0
-    OS-->>Scanner: Returns MEMORY_BASIC_INFORMATION (State, Protect, Size)
-    Note over Scanner: Check: Committed? Readable?<br/>Not PAGE_GUARD?
-    Scanner->>Memory: Reads Page Bytes & Scans for Pattern
-    Scanner->>OS: Query Next Region (BaseAddress + RegionSize)
-    Note over Scanner: Repeats until entire module space is searched
+    Scanner->>OS: Query Address 0x0
+    OS-->>Scanner: Returns Memory Info
+    Note over Scanner: Check: Committed?<br/>Readable?<br/>Not Guard Page?
+    Scanner->>Memory: Scans Page for AOB
+    Scanner->>OS: Query Next Region
 ```
 
 ### 3.1 Filtering Safe Memory Pages

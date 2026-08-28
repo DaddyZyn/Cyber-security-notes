@@ -31,11 +31,16 @@ When you search for a value (such as player health = 100) in memory and restart 
 
 ```mermaid
 flowchart TD
-    Module["Main Game Module Base<br/>game.exe + 0x15A4200 (Static Anchor)"]
-    Module -->|"Points to (0x7FF71000)"| Ptr1["World Context Pointer<br/>(Heap: 0x7FF71000)"]
-    Ptr1 -->|"Offset + 0x38"| Ptr2["Local Player Pointer<br/>(Heap: 0x7FF72500)"]
-    Ptr2 -->|"Offset + 0x100"| Entity["Player Entity Instance<br/>(Heap: 0x7FF79000)"]
-    Entity -->|"Offset + 0x18"| Health["Health Value = 100<br/>(Target Offset)"]
+    Module["Module Base<br/>game.exe + 0x15A4200"]
+    Ptr1["World Context<br/>Heap: 0x7FF71000"]
+    Ptr2["Local Player<br/>Heap: 0x7FF72500"]
+    Entity["Player Entity<br/>Heap: 0x7FF79000"]
+    Health["Health Value<br/>Offset: +0x18"]
+
+    Module -->|Points to| Ptr1
+    Ptr1 -->|+0x38| Ptr2
+    Ptr2 -->|+0x100| Entity
+    Entity -->|+0x18| Health
 ```
 
 ### 1.2 The Module Base Anchor
@@ -92,12 +97,12 @@ Cheat Engine (CE) is the primary dynamic memory introspection tool used to locat
 
 ```mermaid
 flowchart TD
-    Scan1["1. Exact Value Scan (e.g. 100)"] --> Action["2. Take Damage in Game (Health = 85)"]
-    Action --> Scan2["3. Next Scan (Value = 85)"]
-    Scan2 --> Found["4. Target Dynamic Address Located!"]
-    Found --> Breakpoint["5. 'Find What Writes / Accesses' (Hardware Breakpoint)"]
-    Breakpoint --> Disasm["6. Inspect Assembly Instruction & Base Register"]
-    Disasm --> PtrScan["7. Generate Pointer Map & Run Pointer Scanner"]
+    Scan1["1. Exact Scan (100)"] --> Action["2. Take Damage (85)"]
+    Action --> Scan2["3. Next Scan (85)"]
+    Scan2 --> Found["4. Address Found"]
+    Found --> Breakpoint["5. Hardware Breakpoint"]
+    Breakpoint --> Disasm["6. Inspect Opcodes"]
+    Disasm --> PtrScan["7. Pointer Scanner"]
 ```
 
 ### 3.1 Value Scanning Workflows

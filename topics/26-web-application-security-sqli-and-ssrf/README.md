@@ -73,14 +73,14 @@ SSRF occurs when a web server accepts a URL from a user (e.g. "Fetch profile pic
 sequenceDiagram
     autonumber
     participant Attacker as Attacker
-    participant Web as Web Server (Public IP)
-    participant Cloud as AWS Metadata Service (169.254.169.254)
+    participant Web as Web Server
+    participant Cloud as AWS Metadata
 
-    Attacker->>Web: Request: fetch?url=http://169.254.169.254/latest/meta-data/
-    Note over Web: Web Server fetches URL from its own internal network interface!
-    Web->>Cloud: GET http://169.254.169.254/latest/meta-data/iam/security-credentials/role
-    Cloud-->>Web: Returns Temporary AWS Secret Keys & IAM Tokens!
-    Web-->>Attacker: Displays response in UI ➔ Cloud Account Compromised!
+    Attacker->>Web: Request: fetch?url=169.254.169.254
+    Note over Web: Fetches URL via<br/>internal interface!
+    Web->>Cloud: GET /latest/meta-data/
+    Cloud-->>Web: Returns AWS Tokens!
+    Web-->>Attacker: Account Compromised!
 ```
 
 ### 2.2 Cloud Metadata Endpoint Exploitation

@@ -31,10 +31,10 @@ Reverse engineering is the art of deducing the design, architecture, and behavio
 
 ```mermaid
 flowchart TD
-    Binary["Target Executable (.exe / .dll)"]
-    Binary --> Static["Static Analysis (IDA Pro / Ghidra)<br/>Disassembly • Decompilation • XREFs"]
-    Binary --> Dynamic["Dynamic Analysis (x64dbg / CE)<br/>Live Registers • Memory Map • Breakpoints"]
-    Static <-->|Cross-Validate Offsets & Logic| Dynamic
+    Binary["Target Binary<br/>(.exe / .dll)"]
+    Binary --> Static["Static Analysis<br/>(IDA / Ghidra)<br/>Decompiler / XREFs"]
+    Binary --> Dynamic["Dynamic Analysis<br/>(x64dbg / CE)<br/>Registers / Memory"]
+    Static <-->|Cross-Validate| Dynamic
 ```
 
 ### 1.2 Core Tool Ecosystem
@@ -74,10 +74,10 @@ The fastest way to locate critical logic in an unknown binary:
 
 ```mermaid
 flowchart TD
-    S["1. Shift+F12 (Search 'Invalid License')"] --> Str["2. Locate String in .rdata"]
-    Str --> XREF["3. Press 'X' (Cross-References)"]
-    XREF --> Func["4. Jump to Calling Function in .text"]
-    Func --> Decompile["5. Press 'F5' (Decompile to C Pseudocode!)"]
+    S["1. Shift+F12 (Strings)"] --> Str["2. Locate in .rdata"]
+    Str --> XREF["3. Press X (XREFs)"]
+    XREF --> Func["4. Jump to Function"]
+    Func --> Decompile["5. Press F5 (C Code)"]
 ```
 
 ### 2.3 Decompilation & Type Reconstruction
@@ -114,11 +114,11 @@ Cheat Engine includes a built-in disassembler and **Auto Assembler (AA)** script
 
 ```mermaid
 flowchart TD
-    AA["Cheat Engine Auto Assembler (Ctrl+A)"]
-    AA --> AOB["Template: AOB Injection<br/>(Scans for unique signature)"]
-    AA --> Alloc["alloc(newmem, 2048, game.exe)<br/>(Allocates Code Cave)"]
-    AA --> Patch["Overwrites original code with JMP newmem"]
-    AA --> Dealloc["[DISABLE] Section<br/>(Restores original bytes cleanly on toggle)"]
+    AA["Auto Assembler<br/>(Ctrl + A)"]
+    AA --> AOB["Template:<br/>AOB Injection"]
+    AA --> Alloc["alloc(newmem, 2048)<br/>Code Cave"]
+    AA --> Patch["Overwrite with<br/>JMP newmem"]
+    AA --> Dealloc["[DISABLE]<br/>Restore Bytes"]
 ```
 
 ### 4.1 Generating Auto Assembler Code Cave Scripts
