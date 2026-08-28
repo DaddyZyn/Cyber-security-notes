@@ -1,16 +1,16 @@
 <div align="center">
 
-# 🛡️ CYBERSECURITY & LOW-LEVEL SYSTEMS FIELD NOTES
-### *Systems Architecture, Network Forensics, Memory Internals & Reverse Engineering*
+# 🛡️ CYBERSECURITY, LOW-LEVEL SYSTEMS & OPSEC FIELD NOTES
+### *Systems Architecture, Network Forensics, Reverse Engineering & Adversarial Threat Modeling*
 
 [![Author](https://img.shields.io/badge/Author-DaddyZyn%20%7C%20DRAXO.dev-000000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/DaddyZyn)
-[![Focus](https://img.shields.io/badge/Track-Networks%20%26%20Low--Level%20Systems-000000?style=for-the-badge&logo=cplusplus&logoColor=white)](#)
+[![Focus](https://img.shields.io/badge/Tracks-Networks%20%7C%20Low--Level%20%7C%20Game%20Sec%20%7C%20AD-000000?style=for-the-badge&logo=cplusplus&logoColor=white)](#)
 [![Tools](https://img.shields.io/badge/CLI%20Tools-Python%20Suite-000000?style=for-the-badge&logo=python&logoColor=white)](./tools)
 [![Request Topic](https://img.shields.io/badge/Request-New%20Topic-000000?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/DaddyZyn/Cyber-security-notes/issues/new?template=topic_request.yml)
 [![Contributions](https://img.shields.io/badge/PRs-Welcome-000000?style=for-the-badge)](./CONTRIBUTING.md)
 
 <p align="center">
-  <b>A comprehensive, deep technical documentation repository and open-source tool suite for security researchers, systems developers, and reverse engineers.</b><br>
+  <b>A structured, deep technical encyclopedia and open-source tool suite for security researchers, systems developers, and reverse engineers.</b><br>
   <i>Published and maintained by <a href="https://github.com/DaddyZyn"><b>DaddyZyn (DRAXO.dev)</b></a></i>
 </p>
 
@@ -41,9 +41,9 @@ The repository includes a suite of standalone, zero-dependency Python tools in t
 
 ---
 
-## 📑 Core Documentation Modules
+## 📑 Core Documentation Tracks
 
-### 🌐 Track 1: Networking, Forensics & Adversarial Vectors (01–13)
+### 🌐 Track 1: Networking Fundamentals, Packet Forensics & Adversarial Vectors (01–13)
 
 | # | Topic Directory | Focus Areas | Quick Link |
 | :---: | :--- | :--- | :---: |
@@ -63,7 +63,7 @@ The repository includes a suite of standalone, zero-dependency Python tools in t
 
 ---
 
-### ⚙️ Track 2: Low-Level Systems, Memory & Reverse Engineering (14–19)
+### ⚙️ Track 2: Operating System Internals, x64 Assembly & PE Binaries (14–19)
 
 | # | Topic Directory | Focus Areas | Quick Link |
 | :---: | :--- | :--- | :---: |
@@ -76,21 +76,32 @@ The repository includes a suite of standalone, zero-dependency Python tools in t
 
 ---
 
+### 🎮 Track 3: Memory Operations, Reverse Engineering Workflows & Game Security (20–25)
+
+| # | Topic Directory | Focus Areas | Quick Link |
+| :---: | :--- | :--- | :---: |
+| **20** | **[`20-memory-structures-pointers-and-heap-analysis`](./topics/20-memory-structures-pointers-and-heap-analysis/)** | Dynamic Heap Allocations, **Multi-Level Pointer Chains ($[[[[Base+0x10]+0x28]+0x0]+0x130]$)**, Cheat Engine Value/Hardware Breakpoint Scans, ReClass.NET Struct Mapping | [📖 Read Module](./topics/20-memory-structures-pointers-and-heap-analysis/README.md) |
+| **21** | **[`21-aob-pattern-scanning-and-sigmaking`](./topics/21-aob-pattern-scanning-and-sigmaking/)** | Why Offsets Break on Patches, **Array of Bytes (AOB) Wildcard Masks (`xxx????xxx`)**, `VirtualQueryEx` Page Walking, IDA SigMaker Plugins, Fast C++ Memory Scanners | [📖 Read Module](./topics/21-aob-pattern-scanning-and-sigmaking/README.md) |
+| **22** | **[`22-byte-patching-code-caves-and-inline-assembly`](./topics/22-byte-patching-code-caves-and-inline-assembly/)** | **NOP Sleds & Branch Inverting (`JE` ➔ `JMP`)**, `VirtualProtect` Page Swaps, **64-bit Code Caves within $\pm 2\text{ GB}$**, Register State Sleds (`pushfq`/`popfq`), Stolen Instructions | [📖 Read Module](./topics/22-byte-patching-code-caves-and-inline-assembly/README.md) |
+| **23** | **[`23-anti-cheat-architecture-and-kernel-defense`](./topics/23-anti-cheat-architecture-and-kernel-defense/)** | **Kernel (Ring 0) Anti-Cheats (BattlEye, EAC, Vanguard)**, `ObRegisterCallbacks` Handle Stripping, Unbacked Memory Scans, `.text` Hashing, Hypervisor EPT Shadows | [📖 Read Module](./topics/23-anti-cheat-architecture-and-kernel-defense/README.md) |
+| **24** | **[`24-aaa-binary-obfuscation-and-r6-security-mechanics`](./topics/24-aaa-binary-obfuscation-and-r6-security-mechanics/)** | **Why Rainbow Six Siege (R6) is Hard to Reverse**, **Encrypted Pointers (Dynamic ROL/XOR/ADD Decryption Chains)**, Seasonal Polymorphism, VMProtect Game Loop Virtualization | [📖 Read Module](./topics/24-aaa-binary-obfuscation-and-r6-security-mechanics/README.md) |
+| **25** | **[`25-reverse-engineering-workflows-ida-ghidra-x64dbg-ce`](./topics/25-reverse-engineering-workflows-ida-ghidra-x64dbg-ce/)** | **IDA Pro / Ghidra Workflows (Strings `Shift+F12`, XREFs `X`, Decompiler `F5`)**, x64dbg Dynamic Breakpoints (`DR0-DR3`), Cheat Engine Structure Dissection & Auto Assembler | [📖 Read Module](./topics/25-reverse-engineering-workflows-ida-ghidra-x64dbg-ce/README.md) |
+
+---
+
+### 🏢 Track 4: Web Application Security & Enterprise Active Directory (26–27)
+
+| # | Topic Directory | Focus Areas | Quick Link |
+| :---: | :--- | :--- | :---: |
+| **26** | **[`26-web-application-security-sqli-and-ssrf`](./topics/26-web-application-security-sqli-and-ssrf/)** | **SQL Injection (Union, Error, Blind Time-based)**, Parameterized Query Defenses, **SSRF & Cloud Metadata Theft (`169.254.169.254`)**, AWS IMDSv2, XSS & CSP Headers | [📖 Read Module](./topics/26-web-application-security-sqli-and-ssrf/README.md) |
+| **27** | **[`27-active-directory-kerberos-and-credential-access`](./topics/27-active-directory-kerberos-and-credential-access/)** | **Active Directory & Kerberos 4-Step Flow**, **Kerberoasting Service Account Hashes (Hashcat `-m 13100`)**, **LSASS Memory Dumping**, Pass-the-Hash (PtH), LSA PPL & Credential Guard | [📖 Read Module](./topics/27-active-directory-kerberos-and-credential-access/README.md) |
+
+---
+
 ## 🔍 Visual Architecture Overviews
 
 ### 🏛️ 14. Ring 3 to Ring 0 Syscall Transition
 How user mode applications transition execution to the OS kernel:
-
-```mermaid
-flowchart TD
-    A["Local Device<br/>192.168.1.50 (Private)"] -->|LAN Ethernet/Wi-Fi| B["NAT Gateway Router<br/>192.168.1.1"]
-    B -->|WAN Uplink| C["Public Internet<br/>203.0.113.42 (Public)"]
-```
-
----
-
-### 🧠 15. 4-Level Virtual-to-Physical Address Translation
-How the CPU Memory Management Unit (MMU) translates a 48-bit virtual address into physical RAM:
 
 ```mermaid
 sequenceDiagram
@@ -111,23 +122,39 @@ sequenceDiagram
 
 ---
 
-### 💉 18. Inline Detour Hooking with Trampoline
-How inline detours hijack function execution and preserve original functionality using stolen-byte trampolines:
+### 🛡️ 23. Kernel Anti-Cheat vs. User-Mode Application Architecture
+How Ring 0 anti-cheat drivers intercept access requests and strip handle permissions:
+
+```mermaid
+flowchart TD
+    App["External Application<br/>(Ring 3 User Mode)"]
+    Game["Protected Game Process<br/>(Ring 3 User Mode)"]
+    Driver["Kernel Anti-Cheat Driver<br/>(Ring 0 Kernel Mode)"]
+
+    App -->|Attempts OpenProcess| Driver
+    Driver -->|Strips Handle via ObRegisterCallbacks| App
+    Driver -->|Scans Memory & Code Integrity| Game
+```
+
+---
+
+### 🔑 27. Kerberos Authentication & Kerberoasting Flow
+How adversaries extract service tickets from Domain Controllers and crack them offline:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Caller as Calling Code
-    participant Orig as Original Func (Hooked)
-    participant Detour as Custom Detour Function
-    participant Tramp as Trampoline (Stolen Bytes)
+    participant User as Domain User
+    participant DC as Domain Controller (KDC)
+    participant Hashcat as Offline GPU Cracker
 
-    Caller->>Orig: Calls TargetFunction()
-    Orig->>Detour: 14-byte Absolute JMP
-    Detour->>Tramp: Calls Original via Trampoline
-    Tramp->>Orig: Executes Remainder of Logic
-    Orig-->>Detour: Returns Result
-    Detour-->>Caller: Returns Filtered Result
+    User->>DC: 1. AS-REQ (User Auth)
+    DC->>User: 2. AS-REP (TGT Ticket)
+    User->>DC: 3. TGS-REQ (Requests SPN Service Ticket)
+    Note over DC: Encrypts Service Ticket with Service Account NTLM Hash!
+    DC->>User: 4. TGS-REP (Delivers Encrypted Ticket)
+    User->>Hashcat: 5. Exports Hash to Hashcat (-m 13100)
+    Note over Hashcat: Recovers Service Account Password Offline!
 ```
 
 ---
@@ -145,7 +172,11 @@ sequenceDiagram
 | **LLMNR / NetBIOS Spoofing** | Layer 2/3 | ⚠️ Yes | Turn off Multicast Name Resolution in GPO; Disable NetBIOS in WINS |
 | **TCP SYN Flooding** | Layer 4 | ⚠️ Yes | Enable Kernel **SYN Cookies** (`tcp_syncookies = 1`) |
 | **Stack Buffer Overflows** | Memory | ⚠️ Yes | Enable **DEP/NX** + **ASLR** + **Stack Canaries (`/GS`)** |
-| **Indirect Branch Hijacking** | Memory | ⚠️ Yes | Compile with **Control Flow Guard (CFG)** / CET Shadow Stacks |
+| **Kernel Handle Abuse** | Kernel (Ring 0) | ⚠️ Yes | Kernel Object Callbacks (`ObRegisterCallbacks`) |
+| **SQL Injection** | Application (DB) | ⚠️ Yes | Use **Parameterized Queries (Prepared Statements)** |
+| **Server-Side Request Forgery** | Cloud / Web | ⚠️ Yes | Enforce **AWS IMDSv2** + strict URL network allowlists |
+| **Kerberoasting** | Active Directory | ⚠️ Yes | Deploy **Group Managed Service Accounts (gMSA)** + AES-256 |
+| **LSASS Memory Dumping** | Windows OS | ⚠️ Yes | Enable **LSA Protection (PPL)** + **Credential Guard (VBS)** |
 
 ---
 
@@ -158,5 +189,5 @@ Contributions, corrections, and new module submissions are welcome. Please check
 ## ⚖️ License & Credits
 
 * **Author & Maintainer**: [DaddyZyn (DRAXO.dev)](https://github.com/DaddyZyn)
-* **Purpose**: Educational, defensive security research, systems architecture, and reverse engineering documentation.
+* **Purpose**: Educational, defensive security research, systems architecture, reverse engineering, and offensive threat modeling.
 * **Repository**: [https://github.com/DaddyZyn/Cyber-security-notes](https://github.com/DaddyZyn/Cyber-security-notes)
