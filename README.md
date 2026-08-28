@@ -1,16 +1,16 @@
 <div align="center">
 
-# 🛡️ CYBERSECURITY & OPSEC FIELD NOTES
-### *Low-Level Systems Architecture, Network Forensics & Adversarial Threat Modeling*
+# 🛡️ CYBERSECURITY & LOW-LEVEL SYSTEMS FIELD NOTES
+### *Systems Architecture, Network Forensics, Memory Internals & Reverse Engineering*
 
 [![Author](https://img.shields.io/badge/Author-DaddyZyn%20%7C%20DRAXO.dev-000000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/DaddyZyn)
-[![Topic](https://img.shields.io/badge/Focus-Networking%20%26%20Exploits-000000?style=for-the-badge&logo=shield&logoColor=white)](#)
+[![Focus](https://img.shields.io/badge/Track-Networks%20%26%20Low--Level%20Systems-000000?style=for-the-badge&logo=cplusplus&logoColor=white)](#)
 [![Tools](https://img.shields.io/badge/CLI%20Tools-Python%20Suite-000000?style=for-the-badge&logo=python&logoColor=white)](./tools)
 [![Request Topic](https://img.shields.io/badge/Request-New%20Topic-000000?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/DaddyZyn/Cyber-security-notes/issues/new?template=topic_request.yml)
 [![Contributions](https://img.shields.io/badge/PRs-Welcome-000000?style=for-the-badge)](./CONTRIBUTING.md)
 
 <p align="center">
-  <b>A structured, deep technical documentation repository and open-source tool suite for security researchers, systems developers, and learners.</b><br>
+  <b>A comprehensive, deep technical documentation repository and open-source tool suite for security researchers, systems developers, and reverse engineers.</b><br>
   <i>Published and maintained by <a href="https://github.com/DaddyZyn"><b>DaddyZyn (DRAXO.dev)</b></a></i>
 </p>
 
@@ -43,6 +43,8 @@ The repository includes a suite of standalone, zero-dependency Python tools in t
 
 ## 📑 Core Documentation Modules
 
+### 🌐 Track 1: Networking, Forensics & Adversarial Vectors (01–13)
+
 | # | Topic Directory | Focus Areas | Quick Link |
 | :---: | :--- | :--- | :---: |
 | **01** | **[`01-networking-fundamentals`](./topics/01-networking-fundamentals/)** | Public vs. Private IPs, RFC 1918, NAT Translation, IPv4 vs. IPv6 Dual-Stack Leaks, Subnets (`/24`, `/16`), Gateways, DNS UDP 53 & DoH/DoT | [📖 Read Module](./topics/01-networking-fundamentals/README.md) |
@@ -61,50 +63,95 @@ The repository includes a suite of standalone, zero-dependency Python tools in t
 
 ---
 
+### ⚙️ Track 2: Low-Level Systems, Memory & Reverse Engineering (14–19)
+
+| # | Topic Directory | Focus Areas | Quick Link |
+| :---: | :--- | :--- | :---: |
+| **14** | **[`14-operating-system-architecture-rings-and-syscalls`](./topics/14-operating-system-architecture-rings-and-syscalls/)** | **Ring 0 (Kernel) vs. Ring 3 (User)**, 128TB Canonical Address Space, **Syscall Dispatching (`SYSCALL`/`SYSRET`, SSDT)**, `KUSER_SHARED_DATA`, Context Switching & Trap Frames | [📖 Read Module](./topics/14-operating-system-architecture-rings-and-syscalls/README.md) |
+| **15** | **[`15-virtual-memory-page-tables-and-peb-teb`](./topics/15-virtual-memory-page-tables-and-peb-teb/)** | **4-Level Paging (PML4/PDPT/PD/PT, CR3)**, Page Protections (`PAGE_EXECUTE_READWRITE`), **TEB (`gs:[0x30]`)**, **PEB (`gs:[0x60]`, `BeingDebugged`, `InMemoryOrderModuleList`)** | [📖 Read Module](./topics/15-virtual-memory-page-tables-and-peb-teb/README.md) |
+| **16** | **[`16-pe-coff-binary-format-and-dynamic-linking`](./topics/16-pe-coff-binary-format-and-dynamic-linking/)** | **PE32+ Header Hierarchy (DOS `MZ`, NT Headers, Optional Header)**, Sections (`.text`, `.rdata`, `.reloc`), **Import/Export Address Tables (IAT/EAT)**, **ROR13 API Hashing** | [📖 Read Module](./topics/16-pe-coff-binary-format-and-dynamic-linking/README.md) |
+| **17** | **[`17-x86-x64-assembly-registers-and-calling-conventions`](./topics/17-x86-x64-assembly-registers-and-calling-conventions/)** | **x64 General Purpose Registers (`RAX`–`R15`, `RIP`)**, **Microsoft Fastcall (`RCX`, `RDX`, `R8`, `R9`)**, 32-Byte Shadow Space, 16-Byte Stack Alignment, Stack Frame Prologue/Epilogue | [📖 Read Module](./topics/17-x86-x64-assembly-registers-and-calling-conventions/README.md) |
+| **18** | **[`18-process-manipulation-and-hooking-mechanics`](./topics/18-process-manipulation-and-hooking-mechanics/)** | **Process Handles & Memory APIs**, **Manual Mapping (Fileless PE In-Memory Loader)**, **IAT Hooking**, **Inline Detours (Trampoline & 14-byte Absolute JMP)**, **C++ VMT Hooking** | [📖 Read Module](./topics/18-process-manipulation-and-hooking-mechanics/README.md) |
+| **19** | **[`19-reverse-engineering-protections-and-mitigations`](./topics/19-reverse-engineering-protections-and-mitigations/)** | **DEP/NX & ROP Gadgets**, **ASLR**, **Stack Canaries (`/GS`)**, **Identifying Packers (VMProtect, Themida, UPX, Entropy > 7.0)**, **Anti-Debugging (DR0-DR3, 0xCC scans, RDTSC)** | [📖 Read Module](./topics/19-reverse-engineering-protections-and-mitigations/README.md) |
+
+---
+
 ## 🔍 Visual Architecture Overviews
 
-### ⚙️ 13. Metasploit Staged Payload & Reflective DLL Injection
-How Metasploit exploits inject tiny stagers to pull down 100% in-memory (fileless) Meterpreter stages without touching the physical disk:
+### 🏛️ 14. Ring 3 to Ring 0 Syscall Transition
+How user mode applications transition execution to the OS kernel:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Attacker as 🖧 Metasploit Handler (msfconsole)
-    participant Target as 💻 Target Process (Exploited Buffer)
+    participant App as 💻 User Application
+    participant NT as ⚙️ ntdll.dll (Syscall Stub)
+    participant CPU as ⚡ CPU Hardware (MSRs)
+    participant Kernel as 🛡️ ntoskrnl.exe (KiSystemCall64)
 
-    Note over Attacker,Target: 1. Exploit delivers tiny Stager (~250 bytes)
-    Attacker->>Target: Injects Stager into memory
-    Target->>Attacker: Stager executes ➔ Connects back (Reverse TCP:4444)
-    Note over Attacker: 2. Handler streams full Meterpreter DLL stage
-    Attacker->>Target: Streams 1 MB Meterpreter DLL over socket
-    Note over Target: ReflectiveLoader() maps DLL directly in RAM (Zero Disk Footprint!)
+    App->>NT: Calls NtAllocateVirtualMemory()
+    Note over NT: Sets RAX = SSN (0x18)<br>Sets R10 = RCX
+    NT->>CPU: Executes "SYSCALL"
+    Note over CPU: CPL switches from Ring 3 to Ring 0
+    CPU->>Kernel: Jumps to KiSystemCall64 in Ring 0
+    Note over Kernel: Validates SSDT & executes kernel code
+    Kernel->>CPU: Executes "SYSRET"
+    CPU->>App: Returns to Ring 3 User Space
 ```
 
 ---
 
-### 🛡️ 13. Burp Suite Dynamic CA Interception Proxy
-How Burp Suite intercepts and decrypts encrypted HTTPS traffic using dynamically signed certificates:
+### 🧠 15. 4-Level Virtual-to-Physical Address Translation
+How the CPU Memory Management Unit (MMU) translates a 48-bit virtual address into physical RAM:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Browser as 🌐 Client Browser
-    participant Burp as 🛡️ Burp Suite Proxy (Port 8080)
-    participant Server as 🌐 Real Web Server
+    participant CPU as ⚙️ CPU MMU
+    participant CR3 as 🧭 CR3 Register
+    participant PML4 as 🗂️ PML4 Table [47:39]
+    participant PDPT as 🗂️ PDPT Table [38:30]
+    participant PD as 🗂️ PD Table [29:21]
+    participant PT as 🗂️ PT Table [20:12]
+    participant RAM as ⚡ Physical RAM [11:0]
 
-    Browser->>Burp: TLS Client Hello (target.com)
-    Note over Burp: Burp generates forged SSL Cert signed by Burp Root CA
-    Burp->>Browser: TLS Handshake Completed (Decrypted Stream 1)
-    Burp->>Server: Separate TLS Handshake to Real Server (Decrypted Stream 2)
-    Browser->>Burp: Sends HTTP Request (Plaintext in Burp UI)
-    Burp->>Server: Forwards modified HTTP Request over TLS Stream 2
+    CPU->>CR3: Locate PML4 Base
+    CR3->>PML4: Index via PML4 Offset
+    PML4->>PDPT: Index via PDPT Offset
+    PDPT->>PD: Index via PD Offset
+    PD->>PT: Index via PT Offset
+    PT->>RAM: Base Frame + 12-bit Page Offset ➔ Exact Physical Byte!
+```
+
+---
+
+### 💉 18. Inline Detour Hooking with Trampoline
+How inline detours hijack function execution and preserve original functionality using stolen-byte trampolines:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Caller as 💻 Calling Code
+    participant Orig as ⚡ Original Function (Hooked with JMP)
+    participant Detour as 🛡️ Custom Detour Function
+    participant Trampoline as 🗂️ Trampoline (Stolen Bytes + JMP Back)
+
+    Caller->>Orig: Calls TargetFunction()
+    Note over Orig: Hits 14-byte Absolute JMP
+    Orig->>Detour: Redirected to Detour
+    Note over Detour: Inspects/Alters Arguments
+    Detour->>Trampoline: Calls Original via Trampoline
+    Note over Trampoline: Executes Stolen Bytes ➔ Jumps to (Orig + 14)
+    Trampoline->>Orig: Executes remainder of original logic
+    Orig-->>Detour: Returns result
+    Detour-->>Caller: Returns filtered/modified result
 ```
 
 ---
 
 ## 🔒 Complete Hardening & Defense Matrix
 
-| Attack Vector | Layer | Vulnerable Default? | Required Hardening Countermeasure |
+| Attack Vector / Subsystem | Layer | Vulnerable Default? | Required Hardening Countermeasure |
 | :--- | :---: | :---: | :--- |
 | **ARP Cache Poisoning** | Layer 2 | ⚠️ Yes | Dynamic ARP Inspection (DAI) / Static ARP / Encrypted VPN |
 | **DHCP Starvation / Rogue Srv** | Layer 2/3 | ⚠️ Yes | Switchport **DHCP Snooping** + Port Security limits |
@@ -114,8 +161,8 @@ sequenceDiagram
 | **Forced Outbound SMB** | Layer 7 (TCP 445) | ⚠️ Yes | Block Port 445 Outbound; Restrict Outbound NTLM via GPO |
 | **LLMNR / NetBIOS Spoofing** | Layer 2/3 | ⚠️ Yes | Turn off Multicast Name Resolution in GPO; Disable NetBIOS in WINS |
 | **TCP SYN Flooding** | Layer 4 | ⚠️ Yes | Enable Kernel **SYN Cookies** (`tcp_syncookies = 1`) |
-| **WhatsApp / Telegram P2P** | Layer 7 (VoIP) | ⚠️ Yes | Enable **"Protect IP in Calls"** (WhatsApp) / Peer-to-Peer: **Nobody** (Telegram) |
-| **Torrent Swarm IP Leaks** | Layer 7 (P2P) | ⚠️ Yes | Bind qBittorrent network interface strictly to VPN adapter |
+| **Stack Buffer Overflows** | Memory | ⚠️ Yes | Enable **DEP/NX** + **ASLR** + **Stack Canaries (`/GS`)** |
+| **Indirect Branch Hijacking** | Memory | ⚠️ Yes | Compile with **Control Flow Guard (CFG)** / CET Shadow Stacks |
 
 ---
 
@@ -128,5 +175,5 @@ Contributions, corrections, and new module submissions are welcome. Please check
 ## ⚖️ License & Credits
 
 * **Author & Maintainer**: [DaddyZyn (DRAXO.dev)](https://github.com/DaddyZyn)
-* **Purpose**: Educational, defensive security research, and systems engineering documentation.
+* **Purpose**: Educational, defensive security research, systems architecture, and reverse engineering documentation.
 * **Repository**: [https://github.com/DaddyZyn/Cyber-security-notes](https://github.com/DaddyZyn/Cyber-security-notes)
