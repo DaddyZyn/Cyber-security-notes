@@ -44,19 +44,15 @@ ARP is completely **stateless and unauthenticated**:
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Victim as 💻 Victim PC (192.168.1.50)
-    participant Attacker as 🖧 Attacker (192.168.1.100)
-    participant Router as 🌐 Gateway Router (192.168.1.1)
+    participant Victim as Victim PC (192.168.1.50)
+    participant Attacker as Attacker (192.168.1.100)
+    participant Router as Router (192.168.1.1)
 
-    Note over Attacker,Victim: Attacker sends forged Gratuitous ARP
-    Attacker->>Victim: ARP Reply: "192.168.1.1 is at Attacker_MAC"
-    Note over Attacker,Router: Attacker poisons Router's cache too
-    Attacker->>Router: ARP Reply: "192.168.1.50 is at Attacker_MAC"
-
-    Note over Victim,Router: ⚠️ Full MITM Established: All traffic passes through Attacker
-    Victim->>Attacker: Web Request (Destination: Router)
-    Note over Attacker: Attacker inspects/modifies packets
-    Attacker->>Router: Forwards Web Request to Internet
+    Attacker->>Victim: ARP: 192.168.1.1 is at Attacker_MAC
+    Attacker->>Router: ARP: 192.168.1.50 is at Attacker_MAC
+    Note over Victim,Router: MITM Established
+    Victim->>Attacker: Web Request (to Router)
+    Attacker->>Router: Forwards to Internet
 ```
 
 ### 2.2 IP Forwarding & Packet Sniffing
@@ -88,10 +84,10 @@ When an active ARP spoofing attack occurs on your network, Wireshark immediately
 
 ```mermaid
 flowchart TD
-    A["Wireshark Network Capture"] --> B{"Display Filter: arp"}
-    B --> C["🚨 Warning: Duplicate IP address detected for 192.168.1.1"]
-    B --> D["⚠️ High Frequency Unsolicited ARP Opcode 0x0002"]
-    C & D --> E["🎯 MITM Attack in Progress! MAC: 00:0c:29:... is Attacker"]
+    A["Wireshark Capture"] --> B{"Filter: arp"}
+    B --> C["Alert: Duplicate IP<br/>detected for 192.168.1.1"]
+    B --> D["Alert: High Frequency<br/>Gratuitous ARP Reply"]
+    C & D --> E["MITM Detected!<br/>Attacker MAC Identified"]
 ```
 
 ### 3.1 Wireshark Display Filters & Alerts

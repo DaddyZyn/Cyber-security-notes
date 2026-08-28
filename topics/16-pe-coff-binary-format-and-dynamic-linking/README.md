@@ -112,10 +112,10 @@ When your program calls an external function like `MessageBoxA` from `user32.dll
 4. Your compiled code executes: `call QWORD PTR [__imp_MessageBoxA]` (an indirect call through the IAT).
 
 ```mermaid
-flowchart LR
-    Binary["💻 Compiled .exe Code"] -->|"Calls __imp_VirtualAlloc"| IAT["📑 Import Address Table (IAT)"]
-    Loader["⚙️ Windows Loader (ntdll.dll)"] -->|"Overwrites IAT entry at load time with"| RealFunc["⚡ kernel32.dll!VirtualAlloc (0x7FF812345000)"]
-    IAT --> RealFunc
+flowchart TD
+    Code["Compiled .exe Code<br/>Calls __imp_VirtualAlloc"] --> IAT["Import Address Table"]
+    Loader["Windows Loader (ntdll)"] -->|Overwrites with Real Addr| IAT
+    IAT --> Target["kernel32.dll!VirtualAlloc"]
 ```
 
 ### 3.2 The Export Address Table (EAT) Architecture
@@ -127,17 +127,17 @@ Dynamic Link Libraries (`.dll`) expose their public functions through the **Expo
 ```mermaid
 sequenceDiagram
     autonumber
-    participant App as 💻 Name Resolution Engine
-    participant Names as 🗂️ AddressOfNames (Array of string pointers)
-    participant Ordinals as 🗂️ AddressOfNameOrdinals (Index lookup table)
-    participant Funcs as 🗂️ AddressOfFunctions (Array of Function RVAs)
+    participant App as Resolution Loop
+    participant Names as AddressOfNames
+    participant Ordinals as AddressOfNameOrdinals
+    participant Funcs as AddressOfFunctions
 
-    App->>Names: Searches for string "VirtualAllocEx"
-    Names-->>App: Found at Index 42
-    App->>Ordinals: Reads Ordinals[42]
-    Ordinals-->>App: Returns Function Ordinal: 18
-    App->>Funcs: Reads Funcs[18]
-    Funcs-->>App: Returns RVA: 0x0002A540 (Add to DllBase for final address!)
+    App->>Names: Match "VirtualAllocEx"
+    Names-->>App: Index 42
+    App->>Ordinals: Read Ordinals[42]
+    Ordinals-->>App: Ordinal 18
+    App->>Funcs: Read Funcs[18]
+    Funcs-->>App: Function RVA (0x2A540)
 ```
 
 ### 3.3 Base Relocations (`.reloc`) & ASLR Re-basing

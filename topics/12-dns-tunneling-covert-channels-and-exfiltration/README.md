@@ -31,20 +31,15 @@ When an infected endpoint or internal host needs to resolve a domain, it queries
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Malware as 💻 Compromised Host (Behind Firewall)
-    participant CorpDNS as 🖧 Corporate DNS Resolver
-    participant RootTLD as 🌐 Root & TLD Nameservers
-    participant C2 as 🖧 Attacker Authoritative NS (ns1.c2domain.com)
+    participant Malware as Infected Host (LAN)
+    participant CorpDNS as Corporate DNS Resolver
+    participant C2 as Attacker NS (c2domain.com)
 
-    Note over Malware: Malware Base32-encodes stolen data
-    Malware->>CorpDNS: DNS Query: "48656c6c6f50617373.c2domain.com"
-    Note over CorpDNS: Corp DNS sees query for unknown domain
-    CorpDNS->>RootTLD: Who is authoritative for c2domain.com?
-    RootTLD->>CorpDNS: Delegated to ns1.c2domain.com (Attacker)
-    CorpDNS->>C2: DNS Query: "48656c6c6f50617373.c2domain.com"
-    Note over C2: 🎯 Attacker decodes hex: "HelloPass"
-    C2->>CorpDNS: DNS Response (TXT Record: "EXEC_WHOAMI")
-    CorpDNS->>Malware: DNS Response (Delivers C2 Command!)
+    Malware->>CorpDNS: Query: data.c2domain.com
+    CorpDNS->>C2: Recursively Forwards Query
+    Note over C2: Decodes Stolen Data
+    C2->>CorpDNS: Response (TXT: "EXEC_CMD")
+    CorpDNS->>Malware: Delivers C2 Command!
 ```
 
 ### 1.2 Bypassing Firewalls & Captive Portals
@@ -82,11 +77,10 @@ To send commands back to the compromised machine:
 
 ```mermaid
 flowchart TD
-    Capture["Wireshark Network Capture"] --> Filter["Filter: dns.qry.name.len > 50"]
-    Filter --> HighRate["🚨 500+ Queries/min to Single Second-Level Domain"]
-    Filter --> Entropy["⚠️ Subdomains contain random Base32/Hex strings"]
-    Filter --> RecordType["🚨 Abnormal Volume of TXT (Type 16) or NULL (Type 10) Records"]
-    HighRate & Entropy & RecordType --> Alert["🎯 ACTIVE DNS EXFILTRATION DETECTED!"]
+    Cap["DNS Traffic Capture"] --> F1{"Filter: len > 50"}
+    F1 --> F2{"Queries > 500/min to 1 Domain"}
+    F2 --> F3{"Shannon Entropy > 4.2"}
+    F3 --> Alert["ACTIVE DNS TUNNEL DETECTED!"]
 ```
 
 ### 3.1 Wireshark Display Filters

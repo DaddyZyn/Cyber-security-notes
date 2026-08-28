@@ -45,21 +45,20 @@ On x86-64 architecture, a 64-bit virtual address uses its lower 48 bits for addr
 ```mermaid
 sequenceDiagram
     autonumber
-    participant CPU as ⚙️ CPU MMU
-    participant CR3 as 🧭 CR3 Register (Base Physical Addr)
-    participant PML4 as 🗂️ PML4 Table (Page Map Level 4)
-    participant PDPT as 🗂️ Page Directory Pointer Table
-    participant PD as 🗂️ Page Directory
-    participant PT as 🗂️ Page Table
-    participant RAM as ⚡ Physical RAM (4KB Page Frame)
+    participant MMU as CPU MMU
+    participant CR3 as CR3 Register
+    participant PML4 as PML4 Table
+    participant PDPT as PDPT Table
+    participant PD as Page Directory
+    participant PT as Page Table
+    participant RAM as Physical RAM Frame
 
-    CPU->>CR3: Reads CR3 to locate PML4 Base
-    CR3->>PML4: Index via Bits [47:39] (PML4 Entry)
-    PML4->>PDPT: Index via Bits [38:30] (PDPT Entry)
-    PDPT->>PD: Index via Bits [29:21] (PD Entry)
-    PD->>PT: Index via Bits [20:12] (PT Entry)
-    PT->>RAM: Retrieves Physical Base Frame Address
-    CPU->>RAM: Adds 12-bit Page Offset (Bits [11:0]) ➔ Exact Byte in Physical RAM!
+    MMU->>CR3: Read PML4 Base
+    CR3->>PML4: Index PML4 [47:39]
+    PML4->>PDPT: Index PDPT [38:30]
+    PDPT->>PD: Index PD [29:21]
+    PD->>PT: Index PT [20:12]
+    PT->>RAM: Base Frame + Offset [11:0]<br/>Exact Physical Byte!
 ```
 
 ### 1.3 The Page Table Entry (PTE) Flags & The NX/DEP Bit
@@ -135,15 +134,12 @@ The **PEB** is the most important user-mode data structure for process introspec
 
 ```mermaid
 flowchart TD
-    GS["⚡ GS Register (GS:[0x60])"] --> PEB["📦 Process Environment Block (PEB)"]
-    PEB --> DBG["🚩 BeingDebugged (Offset 0x02)"]
-    PEB --> NTG["🚩 NtGlobalFlag (Offset 0xBC)"]
-    PEB --> PARAMS["📋 ProcessParameters (Offset 0x20) ➔ CommandLine & Path"]
-    PEB --> LDR["🗂️ Ldr (PEB_LDR_DATA at Offset 0x18)"]
-    LDR --> MODS["🔗 InMemoryOrderModuleList (Doubly-Linked List of DLLs)"]
-    MODS --> NTDLL["ntdll.dll"]
-    MODS --> K32["kernel32.dll"]
-    MODS --> KBASE["KernelBase.dll"]
+    GS["GS Register (gs:[0x60])"] --> PEB["Process Environment Block"]
+    PEB --> D1["BeingDebugged (Offset 0x02)"]
+    PEB --> D2["NtGlobalFlag (Offset 0xBC)"]
+    PEB --> D3["ProcessParameters (CmdLine)"]
+    PEB --> LDR["Ldr (InMemoryOrderModuleList)"]
+    LDR --> DLLs["ntdll.dll / kernel32.dll"]
 ```
 
 ### 4.1 Navigating to the PEB in C/C++

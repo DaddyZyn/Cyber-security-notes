@@ -36,16 +36,10 @@ Adversaries on Discord, Telegram, or gaming lobbies frequently use social engine
 
 ```mermaid
 flowchart TD
-    subgraph SS7_Myth["❌ What Larpers Claim They Do"]
-        L["Script Kiddie / Larper"] -->|"Claims Direct SS7 Access"| Cell["🛰️ Live Cell Tower GPS Tracking"]
-    end
-
-    subgraph Real_OSINT["🔍 What Threat Actors Actually Do"]
-        A["Phone Number: +1-555-xxx-xxxx"] --> B["🗄️ Breached Retail DBs (Facebook 533M, Delivery Apps)"]
-        A --> C["📖 Truecaller / Eyecon Contact Sync Scrapes"]
-        A --> D["🏢 Public Data Brokers (FastPeopleSearch, Whitepages)"]
-        B & C & D --> Res["👤 Full Name + Old Billing Addresses + Known Aliases"]
-    end
+    P["Target Phone Number"]
+    P --> C["Contact Scrapers<br/>Truecaller / Eyecon"]
+    P --> B["Data Breaches<br/>Delivery / Retail Dumps"]
+    P --> S["SIM Swapping<br/>Carrier Social Engineering"]
 ```
 
 * **SS7 (Signaling System No. 7)**: The international telecom protocol used for routing SMS and roaming.
@@ -79,10 +73,12 @@ The only high-consequence direct attack utilizing a phone number is **SIM Swappi
 ## 3. The Phone Number Defense Playbook
 
 ```mermaid
-flowchart LR
-    Tier1["💳 <b>TIER 1: Financial / Legal</b><br>Real Carrier SIM<br><i>Known ONLY to Banks & Gov</i>"]
-    Tier2["📦 <b>TIER 2: Personal / Daily</b><br>Private VoIP (MySudo / VoIP.ms)<br><i>Friends & Trusted Contacts</i>"]
-    Tier3["🔥 <b>TIER 3: Burner / Online</b><br>Disposable SMS / Matrix / Session<br><i>Discord, Gaming, Forums</i>"]
+flowchart TD
+    T1["Tier 1: Personal SIM<br/>Banks & Government Only"]
+    T2["Tier 2: Private VoIP<br/>Friends & Trusted Contacts"]
+    T3["Tier 3: Non-VoIP Burners<br/>Online Accounts & Forums"]
+
+    T1 --> T2 --> T3
 ```
 
 ### 3.1 Tiered Number Architecture

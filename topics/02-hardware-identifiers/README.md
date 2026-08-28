@@ -43,15 +43,16 @@ Format: `00:1A:2B:3C:4D:5E` (6 hexadecimal octets)
 ```mermaid
 sequenceDiagram
     autonumber
-    participant PC as 💻 Your PC (NIC)
-    participant Router as 🖧 Local Gateway (NAT)
-    participant Web as 🌐 Target Server (Internet)
-    Note over PC,Router: OSI Layer 2 Broadcast Domain
-    PC->>Router: Frame [Src MAC: 00:11:22.. | Dst MAC: Router_LAN_MAC]
-    Note over Router: ⚠️ ROUTER STRIPS ETHERNET FRAME & MAC
-    Note over Router,Web: OSI Layer 3 Public IP Routing
-    Router->>Web: Packet [Src IP: Router_Public_IP | Dst IP: Target_IP]
-    Note over Web: Server sees 0% of your PC's physical MAC
+    participant PC as Your PC (NIC)
+    participant Router as Local Router (NAT)
+    participant Web as Target Server
+
+    Note over PC,Router: Layer 2 Local Frame
+    PC->>Router: Frame (Src: PC_MAC)
+    Note over Router: Router Strips Frame & MAC
+    Note over Router,Web: Layer 3 IP Packet
+    Router->>Web: Packet (Src: Router_Public_IP)
+    Note over Web: Server sees 0% of PC MAC
 ```
 
 > [!NOTE]

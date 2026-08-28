@@ -31,12 +31,11 @@ Modern compilers and operating systems implement defense-in-depth layers to prev
 
 ```mermaid
 flowchart TD
-    subgraph Mitigations["🛡️ OS & Compiler Mitigation Stack"]
-        DEP["1. DEP / NX<br>Blocks code execution on Stack & Heap"]
-        ASLR["2. ASLR<br>Randomizes Base Memory Locations"]
-        GS["3. Stack Canaries (/GS)<br>Detects Buffer Overflows before RET"]
-        CFG["4. Control Flow Guard<br>Validates Indirect Call Targets"]
-    end
+    DEP["1. DEP / NX<br/>Non-Executable Stack & Heap"]
+    ASLR["2. ASLR<br/>Randomizes Base Addresses"]
+    GS["3. Stack Canaries (/GS)<br/>Detects Buffer Overwrites"]
+    CFG["4. Control Flow Guard<br/>Validates Indirect Call Targets"]
+    DEP --> ASLR --> GS --> CFG
 ```
 
 ### 1.1 DEP / NX (Data Execution Prevention) & ROP Chains
@@ -60,13 +59,13 @@ flowchart TD
 When loading an unknown binary into a PE viewer (PE-bear, CFF Explorer) or disassembler, several key indicators immediately reveal that the binary is packed, encrypted, or protected:
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["Raw Binary File"] --> B{"1. Section Entropy > 7.0?"}
-    B -->|Yes| P["🚨 Packed / Encrypted Code Section"]
+    B -->|Yes| P["Packed / Encrypted Binary"]
     B -->|No| N["Clean Unpacked Binary"]
-    A --> C{"2. Import Table has < 5 functions?"}
+    A --> C{"2. Import Table < 5 APIs?"}
     C -->|Yes| P
-    A --> D{"3. Section Names: .vmp / UPX / Themida?"}
+    A --> D{"3. Section: .vmp / UPX?"}
     D -->|Yes| P
 ```
 
@@ -96,12 +95,10 @@ Protected software employs several distinct detection checks to spot active debu
 
 ```mermaid
 flowchart TD
-    subgraph Anti_Debug["🕵️ Core Anti-Debugging Check Categories"]
-        P1["1. PEB Flags<br>BeingDebugged == 1 • NtGlobalFlag == 0x70"]
-        P2["2. Hardware Registers<br>DR0-DR3 != 0 (Hardware Breakpoints)"]
-        P3["3. Software Scans<br>Scanning for 0xCC (INT 3 Breakpoints)"]
-        P4["4. Timing Deltas<br>RDTSC delta > 1,000,000 cycles (User Stepping)"]
-    end
+    P1["1. PEB Flags<br/>BeingDebugged == 1<br/>NtGlobalFlag == 0x70"]
+    P2["2. Hardware Registers<br/>DR0-DR3 != 0 (Breakpoints)"]
+    P3["3. Software Breakpoints<br/>Scanning for 0xCC (INT 3)"]
+    P4["4. Timing Checks<br/>RDTSC delta > 1M cycles"]
 ```
 
 ### 3.1 PEB Checks
@@ -147,17 +144,11 @@ Transforms clean, readable nested `if-else` and `while` loops into a single mono
 
 ```mermaid
 flowchart TD
-    subgraph Normal_Code["Clean Control Flow"]
-        N1["Block A"] --> N2["Block B"] --> N3["Block C"]
-    end
-
-    subgraph Flattened_Code["Control Flow Flattening (Obfuscated)"]
-        Dispatcher["⚡ Central State Dispatcher (Switch State)"]
-        Dispatcher -->|"State == 1"| B1["Execute Block A ➔ State = 3"]
-        Dispatcher -->|"State == 2"| B2["Execute Block B ➔ State = 9"]
-        Dispatcher -->|"State == 3"| B3["Execute Block C ➔ State = 0"]
-        B1 & B2 & B3 --> Dispatcher
-    end
+    Dispatcher["Central State Dispatcher<br/>(Switch State)"]
+    Dispatcher -->|State == 1| B1["Block A (State = 3)"]
+    Dispatcher -->|State == 2| B2["Block B (State = 9)"]
+    Dispatcher -->|State == 3| B3["Block C (State = 0)"]
+    B1 & B2 & B3 --> Dispatcher
 ```
 
 ### 4.2 Virtual Machine Protection (Bytecode Virtualization)

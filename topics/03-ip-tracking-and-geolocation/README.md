@@ -51,12 +51,10 @@ When someone enters an IP address into an online lookup tool (e.g., MaxMind GeoI
 
 ```mermaid
 flowchart TD
-    subgraph GeoIP_Limits["🌍 Pure IP Geolocation (MaxMind / IPinfo)"]
-        IP["🎯 Target IP: 73.182.xx.xx"] --> Country["✅ Country Level (~99% Accurate)"]
-        IP --> Region["✅ Region / State (~80% Accurate)"]
-        IP --> City["⚠️ City Centroid (~60% Accurate)"]
-        IP --> Street["❌ Rooftop House Address (0% Impossible)"]
-    end
+    IP["Target IP Address"]
+    IP --> Country["Country Level<br/>(~99% Accurate)"]
+    IP --> City["City Centroid<br/>(~60% Accurate)"]
+    IP --> Street["Rooftop Address<br/>(0% Impossible via IP)"]
 ```
 
 > [!CAUTION]
@@ -83,10 +81,10 @@ If IP geolocation is inaccurate, how do skilled doxxers, threat actors, and inve
 
 ```mermaid
 flowchart TD
-    A["🎯 Physical House Identification Vectors"] --> B["📡 Wi-Fi BSSID Mapping (WiGLE / Skyhook 5-10m)"]
-    A --> C["🗄️ Leaked Delivery & Billing Databases (OSINT)"]
-    A --> D["📋 ISP DHCP Subpoena Records (Legal / Insider)"]
-    A --> E["📱 Onboard Device GPS & Sensor APIs"]
+    A["Target Physical House"]
+    A --> BSSID["Wi-Fi BSSID Mapping<br/>(WiGLE 5-10m Accuracy)"]
+    A --> Breach["Data Breaches<br/>(Leaked Billing Records)"]
+    A --> ISP["ISP DHCP Subpoena<br/>(Legal Subscriber Contract)"]
 ```
 
 ### 3.1 Wi-Fi BSSID Geolocation (War-driving Databases)

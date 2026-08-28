@@ -30,9 +30,9 @@ Understanding how data moves across Layer 2 and Layer 3 of the OSI model is mand
 * **Private IP**: Non-routable IP addresses reserved exclusively for local area networks (LAN). They sit behind a router and cannot be contacted directly from the wider internet without port forwarding or tunneling.
 
 ```mermaid
-flowchart LR
-    A["💻 <b>Local PC</b><br><code>192.168.1.50</code><br><i>RFC 1918 Private</i>"] -->|"LAN Ethernet / Wi-Fi"| B["🖧 <b>NAT Gateway Router</b><br><code>192.168.1.1</code><br><i>Translates Port & IP</i>"]
-    B -->|"WAN Uplink"| C["🌐 <b>Public Internet</b><br><code>203.0.113.42</code><br><i>Sees Only Router Public IP</i>"]
+flowchart TD
+    A["Local PC<br/>192.168.1.50 (Private)"] -->|LAN Traffic| B["NAT Gateway Router<br/>192.168.1.1"]
+    B -->|WAN Uplink| C["Public Internet<br/>203.0.113.42 (Public)"]
 ```
 
 ### 1.2 RFC 1918 Private Address Ranges
@@ -99,11 +99,12 @@ DNS converts human-readable domain names (`target.com`) into IP addresses (`93.1
 
 ```mermaid
 flowchart TD
-    Client["💻 <b>Client Browser</b><br><i>Checks Local Cache & Hosts</i>"] -->|"1. Cache Miss"| Resolver["⚡ <b>Recursive Resolver</b><br><i>ISP / 1.1.1.1 / 8.8.8.8</i>"]
-    Resolver -->|"2. Query Root"| Root["🌐 <b>Root Server (.)</b>"]
-    Resolver -->|"3. Query TLD"| TLD["🏢 <b>TLD Server (.com)</b>"]
-    Resolver -->|"4. Query Auth"| Auth["🎯 <b>Authoritative Server (target.com)</b>"]
-    Auth -.->|"5. Returns IP 93.184.216.34"| Resolver -.->|"6. Resolved Address"| Client
+    Client["Client Browser<br/>Cache & Hosts"] -->|1. Query| Resolver["Recursive Resolver<br/>1.1.1.1 / 8.8.8.8"]
+    Resolver -->|2. Query| Root["Root Server (.)"]
+    Resolver -->|3. Query| TLD["TLD Server (.com)"]
+    Resolver -->|4. Query| Auth["Authoritative Server<br/>target.com"]
+    Auth -.->|5. Returns IP| Resolver
+    Resolver -.->|6. Resolved Address| Client
 ```
 
 ### 4.2 Why Plaintext DNS Destroys Anonymity

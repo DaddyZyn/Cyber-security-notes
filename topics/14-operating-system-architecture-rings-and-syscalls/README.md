@@ -28,12 +28,12 @@ Modern x86/x64 microprocessors feature four hardware privilege levels called **R
 
 ```mermaid
 flowchart TD
-    subgraph Rings["⚙️ Hardware CPU Privilege Rings"]
-        R3["🛡️ Ring 3: USER MODE<br>Web Browsers • Games • Applications • Windows Subsystems"]
-        R12["🔒 Rings 1 & 2: Unused in Windows/Linux (Legacy Device Drivers)"]
-        R0["⚡ Ring 0: KERNEL MODE<br>OS Kernel (ntoskrnl.exe) • Hardware Drivers • HAL • Page Tables"]
-        R3 -->|"Must execute SYSCALL to access"| R0
-    end
+    R3["Ring 3: USER MODE<br/>Applications / Games<br/>Web Browsers / Services"]
+    R0["Ring 0: KERNEL MODE<br/>ntoskrnl.exe / Drivers<br/>Hardware / Page Tables"]
+    R12["Rings 1 & 2: UNUSED<br/>(Legacy / Unused in x64)"]
+
+    R3 -->|"SYSCALL"| R0
+    R0 -->|"SYSRET"| R3
 ```
 
 ### 1.1 Ring 0 (Kernel Mode) vs. Ring 3 (User Mode)
@@ -103,21 +103,21 @@ When a User-Mode application needs to read a file (`ReadFile`), allocate memory 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant App as 💻 Application (User Code)
-    participant K32 as 📦 kernel32.dll / KernelBase.dll
-    participant NT as ⚙️ ntdll.dll (Native API)
-    participant CPU as ⚡ CPU Hardware (MSR Registers)
-    participant Kernel as 🛡️ ntoskrnl.exe (KiSystemCall64)
+    participant App as App Code
+    participant K32 as kernel32.dll
+    participant NT as ntdll.dll
+    participant CPU as CPU MSR
+    participant Kernel as ntoskrnl.exe
 
-    App->>K32: Calls OpenProcess()
-    K32->>NT: Calls NtOpenProcess()
-    Note over NT: Sets RAX = Syscall Number (e.g., 0x26)<br>Sets R10 = RCX
-    NT->>CPU: Executes "SYSCALL" Instruction
-    Note over CPU: CPU switches CPL from Ring 3 to Ring 0<br>Loads RIP from IA32_LSTAR register
-    CPU->>Kernel: Jumps to KiSystemCall64
-    Note over Kernel: Validates user buffers in SSDT<br>Executes kernel-level NtOpenProcess()
-    Kernel->>CPU: Executes "SYSRET"
-    CPU->>App: Returns back to Ring 3 with result Handle
+    App->>K32: OpenProcess()
+    K32->>NT: NtOpenProcess()
+    Note over NT: EAX = SSN (0x26)<br/>R10 = RCX
+    NT->>CPU: SYSCALL Instruction
+    Note over CPU: CPL: Ring 3 -> 0<br/>RIP = IA32_LSTAR
+    CPU->>Kernel: KiSystemCall64
+    Note over Kernel: Validates SSDT<br/>Executes NtOpenProcess
+    Kernel->>CPU: SYSRET
+    CPU->>App: Returns Handle
 ```
 
 ### 3.2 The x64 `SYSCALL` / `SYSRET` Assembly Instructions

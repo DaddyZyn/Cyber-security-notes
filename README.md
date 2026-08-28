@@ -82,21 +82,9 @@ The repository includes a suite of standalone, zero-dependency Python tools in t
 How user mode applications transition execution to the OS kernel:
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    participant App as 💻 User Application
-    participant NT as ⚙️ ntdll.dll (Syscall Stub)
-    participant CPU as ⚡ CPU Hardware (MSRs)
-    participant Kernel as 🛡️ ntoskrnl.exe (KiSystemCall64)
-
-    App->>NT: Calls NtAllocateVirtualMemory()
-    Note over NT: Sets RAX = SSN (0x18)<br>Sets R10 = RCX
-    NT->>CPU: Executes "SYSCALL"
-    Note over CPU: CPL switches from Ring 3 to Ring 0
-    CPU->>Kernel: Jumps to KiSystemCall64 in Ring 0
-    Note over Kernel: Validates SSDT & executes kernel code
-    Kernel->>CPU: Executes "SYSRET"
-    CPU->>App: Returns to Ring 3 User Space
+flowchart TD
+    A["Local Device<br/>192.168.1.50 (Private)"] -->|LAN Ethernet/Wi-Fi| B["NAT Gateway Router<br/>192.168.1.1"]
+    B -->|WAN Uplink| C["Public Internet<br/>203.0.113.42 (Public)"]
 ```
 
 ---
@@ -107,20 +95,18 @@ How the CPU Memory Management Unit (MMU) translates a 48-bit virtual address int
 ```mermaid
 sequenceDiagram
     autonumber
-    participant CPU as ⚙️ CPU MMU
-    participant CR3 as 🧭 CR3 Register
-    participant PML4 as 🗂️ PML4 Table [47:39]
-    participant PDPT as 🗂️ PDPT Table [38:30]
-    participant PD as 🗂️ PD Table [29:21]
-    participant PT as 🗂️ PT Table [20:12]
-    participant RAM as ⚡ Physical RAM [11:0]
+    participant App as User Application
+    participant NT as ntdll.dll (Syscall Stub)
+    participant CPU as CPU Hardware (MSRs)
+    participant Kernel as ntoskrnl.exe (KiSystemCall64)
 
-    CPU->>CR3: Locate PML4 Base
-    CR3->>PML4: Index via PML4 Offset
-    PML4->>PDPT: Index via PDPT Offset
-    PDPT->>PD: Index via PD Offset
-    PD->>PT: Index via PT Offset
-    PT->>RAM: Base Frame + 12-bit Page Offset ➔ Exact Physical Byte!
+    App->>NT: NtAllocateVirtualMemory()
+    Note over NT: EAX = SSN (0x18)<br/>R10 = RCX
+    NT->>CPU: SYSCALL Instruction
+    Note over CPU: CPL: Ring 3 -> Ring 0
+    CPU->>Kernel: KiSystemCall64 in Ring 0
+    Kernel->>CPU: SYSRET
+    CPU->>App: Returns to User Space
 ```
 
 ---
@@ -131,20 +117,17 @@ How inline detours hijack function execution and preserve original functionality
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Caller as 💻 Calling Code
-    participant Orig as ⚡ Original Function (Hooked with JMP)
-    participant Detour as 🛡️ Custom Detour Function
-    participant Trampoline as 🗂️ Trampoline (Stolen Bytes + JMP Back)
+    participant Caller as Calling Code
+    participant Orig as Original Func (Hooked)
+    participant Detour as Custom Detour Function
+    participant Tramp as Trampoline (Stolen Bytes)
 
     Caller->>Orig: Calls TargetFunction()
-    Note over Orig: Hits 14-byte Absolute JMP
-    Orig->>Detour: Redirected to Detour
-    Note over Detour: Inspects/Alters Arguments
-    Detour->>Trampoline: Calls Original via Trampoline
-    Note over Trampoline: Executes Stolen Bytes ➔ Jumps to (Orig + 14)
-    Trampoline->>Orig: Executes remainder of original logic
-    Orig-->>Detour: Returns result
-    Detour-->>Caller: Returns filtered/modified result
+    Orig->>Detour: 14-byte Absolute JMP
+    Detour->>Tramp: Calls Original via Trampoline
+    Tramp->>Orig: Executes Remainder of Logic
+    Orig-->>Detour: Returns Result
+    Detour-->>Caller: Returns Filtered Result
 ```
 
 ---

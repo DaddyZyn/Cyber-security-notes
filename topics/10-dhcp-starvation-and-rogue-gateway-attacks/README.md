@@ -31,17 +31,13 @@ When a device connects to an Ethernet port or Wi-Fi network, it obtains its netw
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Client as 💻 New Device (0.0.0.0)
-    participant Server as 🖧 Legitimate DHCP Server (192.168.1.1)
+    participant Client as Client (0.0.0.0)
+    participant Server as DHCP Server (192.168.1.1)
 
-    Client->>Server: 1. DHCP DISCOVER (Broadcast 255.255.255.255:67)
-    Note over Client: "I need an IP address. My MAC is 00:11:22:33:44:55"
-    Server->>Client: 2. DHCP OFFER (Unicast / Broadcast:68)
-    Note over Server: "I offer IP 192.168.1.50 for 24 hours"
-    Client->>Server: 3. DHCP REQUEST (Broadcast 255.255.255.255:67)
-    Note over Client: "I accept 192.168.1.50 from Server 192.168.1.1"
-    Server->>Client: 4. DHCP ACK (Unicast / Broadcast:68)
-    Note over Server: "Lease confirmed. Gateway: 192.168.1.1, DNS: 1.1.1.1"
+    Client->>Server: 1. DHCP DISCOVER (Broadcast)
+    Server->>Client: 2. DHCP OFFER (192.168.1.50)
+    Client->>Server: 3. DHCP REQUEST (Accept Offer)
+    Server->>Client: 4. DHCP ACK (Lease Confirmed)
 ```
 
 ### 1.2 Key DHCP Options Assigned to Clients
@@ -63,11 +59,10 @@ Standard DHCP servers assign IP addresses based on the **Client Hardware Address
 
 ```mermaid
 flowchart TD
-    Attacker["🖧 Attacker (Generating Fake MACs)"] -->|"Floods 1,000 DISCOVER packets/sec"| Switch["🖧 Network Switch"]
-    Switch --> DHCP["🌐 Legitimate DHCP Server"]
-    DHCP --> Pool["⚠️ IP Address Pool: 100% EXHAUSTED (0 Available IPs)"]
-    NewClient["💻 Legitimate New User"] -->|"Sends DHCP Discover"| DHCP
-    DHCP -->|"No IPs Available (Request Ignored)"| NewClient
+    Attacker["Attacker (Fake MACs)"] -->|1,000 DISCOVER/sec| DHCP["DHCP Server"]
+    DHCP --> Pool["IP Address Pool<br/>100% EXHAUSTED"]
+    NewUser["Legitimate Client"] -->|DHCP Discover| DHCP
+    DHCP -->|No IPs Left| NewUser
 ```
 
 ### 2.2 Attack Tooling (Yersinia / Scapy)
@@ -86,18 +81,16 @@ Once the legitimate DHCP server is starved (or simply outraced by an attacker wi
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Victim as 💻 Victim Device (Joining Network)
-    participant Rogue as 🖧 Rogue DHCP Server (Attacker: 192.168.1.100)
-    participant Real as 🌐 Legitimate DHCP Server (Starved / Outraced)
+    participant Victim as Victim Client
+    participant Rogue as Rogue DHCP (Attacker)
+    participant Real as Real DHCP (Starved)
 
-    Victim->>Rogue: DHCP DISCOVER (Broadcast)
-    Victim->>Real: DHCP DISCOVER (Broadcast)
-    Note over Real: Starved / Pool empty or slow
-    Rogue->>Victim: ⚡ DHCP OFFER (Replies First!)
-    Note over Rogue: IP: 192.168.1.150 | Gateway: 192.168.1.100 (Attacker) | DNS: 192.168.1.100
-    Victim->>Rogue: DHCP REQUEST (Accepts Rogue Offer)
+    Victim->>Rogue: DHCP DISCOVER
+    Victim->>Real: DHCP DISCOVER
+    Rogue->>Victim: DHCP OFFER (Gateway: Attacker IP)
+    Victim->>Rogue: DHCP REQUEST
     Rogue->>Victim: DHCP ACK
-    Note over Victim: ⚠️ All Victim Internet Traffic routes directly through Attacker!
+    Note over Victim: Traffic Routes via Attacker!
 ```
 
 ### 3.1 Becoming the Default Gateway & DNS
@@ -137,11 +130,10 @@ To confirm a Rogue DHCP server in Wireshark:
 Consumer home routers lack layer-2 switch defense features, but enterprise networks deploy two critical switchport controls:
 
 ```mermaid
-flowchart LR
-    subgraph Managed_Switch["🖧 Enterprise Switch (DHCP Snooping Enabled)"]
-        Trust["Port 1: TRUSTED<br>(Uplink to Real DHCP Server)"] --> Pass["✅ Allows DHCP Offers/ACKs"]
-        Untrust["Port 2-24: UNTRUSTED<br>(End-User Access Ports)"] --> Block["❌ DROPS any Rogue DHCP Offer/ACK"]
-    end
+flowchart TD
+    Switch["Enterprise Switch<br/>(DHCP Snooping)"]
+    Switch --> P1["Trusted Port (Uplink)<br/>Allows DHCP Offers/ACKs"]
+    Switch --> P2["Untrusted Ports (Users)<br/>DROPS any Rogue Offers"]
 ```
 
 ### 5.1 DHCP Snooping

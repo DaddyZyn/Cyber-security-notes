@@ -28,17 +28,10 @@ When a VPN client starts on your machine:
 3. It establishes an encrypted tunnel (using protocols like **WireGuard** or **OpenVPN**) over UDP/TCP to a remote VPN server.
 
 ```mermaid
-flowchart LR
-    subgraph Direct_Connection["❌ Standard Connection (No VPN)"]
-        A1["💻 Application"] -->|"Plaintext IP Headers"| B1["🖧 ISP Router (Logs Everything)"]
-        B1 -->|"Real Public IP Visible"| C1["🌐 Target Website"]
-    end
-
-    subgraph VPN_Encrypted_Tunnel["🛡️ VPN Protected Tunnel"]
-        A2["💻 Application"] -->|"Encrypted Virtual TUN"| B2["🖧 ISP (Sees only UDP Stream)"]
-        B2 -->|"Encrypted Tunnel"| C2["⚡ VPN Node (Decrypts Payload)"]
-        C2 -->|"Exit IP Forwarded"| D2["🌐 Target Website (Sees VPN IP)"]
-    end
+flowchart TD
+    A["Your Local PC<br/>192.168.1.50"] -->|Encrypted Tunnel| B["Virtual TUN Adapter<br/>10.2.0.2"]
+    B -->|Encrypted WireGuard| C["VPN Gateway Server<br/>185.220.101.5"]
+    C -->|Decrypted WAN| D["Target Web Server<br/>Sees Only VPN IP"]
 ```
 
 ### 1.2 The Trust Shift Rule
@@ -115,11 +108,11 @@ Using Mullvad or any VPN **only conceals your IP address**. Advanced adversaries
 
 ```mermaid
 flowchart TD
-    L5["🛡️ <b>LAYER 5: Human Operational Discipline</b><br>Zero Cross-Contamination • No Personal Accounts • Disposable Personas"]
-    L4["💻 <b>LAYER 4: Ephemeral Operating Systems</b><br>Tails OS (Amnesic RAM-only) • Qubes OS (Hardware Domain Isolation) • Whonix"]
-    L3["🌐 <b>LAYER 3: Anti-Fingerprinting Browsers</b><br>Mullvad Browser • Tor Browser (Uniform Canvas, WebGL & Audio Hashes)"]
-    L2["🔒 <b>LAYER 2: Protocol & Network Hardening</b><br>DNS-over-HTTPS (DoH) • WebRTC STUN Disabled • IPv6 Dual-Stack Disabled"]
-    L1["⚡ <b>LAYER 1: Network Proxy Tunnel</b><br>Mullvad WireGuard (RAM-Only Diskless) • Multi-Hop Onion Routing"]
+    L5["LAYER 5: Human OPSEC<br/>Zero Cross-Contamination"]
+    L4["LAYER 4: Ephemeral OS<br/>Tails OS / Qubes / Whonix"]
+    L3["LAYER 3: Anti-Fingerprint<br/>Mullvad / Tor Browser"]
+    L2["LAYER 2: Protocol Hardening<br/>DoH / WebRTC Disabled"]
+    L1["LAYER 1: Network Tunnel<br/>WireGuard RAM-Only Multi-Hop"]
 
     L5 --> L4 --> L3 --> L2 --> L1
 ```

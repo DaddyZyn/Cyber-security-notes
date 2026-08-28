@@ -39,18 +39,18 @@ HANDLE hProcess = OpenProcess(
 ```mermaid
 sequenceDiagram
     autonumber
-    participant App as 💻 Controller Process
-    participant Kernel as 🛡️ Windows Kernel (ntoskrnl)
-    participant Target as 🎯 Target Process Virtual Memory
+    participant App as Injector
+    participant Kernel as Windows Kernel
+    participant Target as Target Process RAM
 
     App->>Kernel: OpenProcess(targetPID)
-    Kernel-->>App: Returns Valid Process Handle
-    App->>Kernel: VirtualAllocEx(hProcess, 4096, PAGE_EXECUTE_READWRITE)
-    Kernel->>Target: Maps 4KB Virtual Memory Page in Target Space
-    App->>Kernel: WriteProcessMemory(hProcess, targetAddr, buffer, size)
-    Kernel->>Target: Writes Bytes into Target Address Space
-    App->>Kernel: CreateRemoteThread(hProcess, startRoutine, param)
-    Kernel->>Target: Spawns new thread executing in Target Space!
+    Kernel-->>App: Handle
+    App->>Kernel: VirtualAllocEx(PAGE_RWX)
+    Kernel->>Target: Maps Memory Page
+    App->>Kernel: WriteProcessMemory()
+    Kernel->>Target: Writes Payload Bytes
+    App->>Kernel: CreateRemoteThread()
+    Kernel->>Target: Executes Remote Thread!
 ```
 
 ---
@@ -65,11 +65,11 @@ $$\text{HMODULE WINAPI LoadLibraryA(LPCSTR lpLibFileName);}$$
 
 ```mermaid
 flowchart TD
-    A["1. OpenProcess(Target_PID)"] --> B["2. VirtualAllocEx(Target, 'C:\\my.dll')"]
-    B --> C["3. WriteProcessMemory(Target, PathString)"]
-    C --> D["4. GetProcAddress(kernel32, 'LoadLibraryA')"]
-    D --> E["5. CreateRemoteThread(Target, LoadLibraryA, PtrToPathString)"]
-    E --> F["🎯 Target Process calls LoadLibraryA and loads our DLL into its space!"]
+    A["1. OpenProcess(PID)"] --> B["2. VirtualAllocEx(Path)"]
+    B --> C["3. WriteProcessMemory(Path)"]
+    C --> D["4. GetProcAddress(LoadLibraryA)"]
+    D --> E["5. CreateRemoteThread(LoadLibraryA)"]
+    E --> F["DLL Loaded in Target!"]
 ```
 
 > **Limitations & Detection Vectors**:
@@ -84,17 +84,13 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Injector as 💻 Injector
-    participant Target as 🎯 Target Process RAM
+    participant Injector as Injector
+    participant Target as Target Process RAM
 
-    Injector->>Target: 1. VirtualAllocEx(ImageSize, PAGE_EXECUTE_READWRITE)
-    Injector->>Target: 2. Copies PE Headers and Maps Sections (.text, .rdata, .data)
-    Injector->>Target: 3. Injects Custom Loader Shellcode
-    Note over Target: Loader Shellcode executes inside Target:
-    Target->>Target: A. Resolves Base Relocations (.reloc Delta)
-    Target->>Target: B. Parses Import Table (IAT) & resolves DLL dependencies
-    Target->>Target: C. Executes TLS (Thread Local Storage) Callbacks
-    Target->>Target: D. Calls DllMain(hModule, DLL_PROCESS_ATTACH, NULL)
+    Injector->>Target: 1. VirtualAllocEx(ImageSize)
+    Injector->>Target: 2. Maps PE Headers & Sections
+    Injector->>Target: 3. Injects Loader Shellcode
+    Note over Target: Loader Resolves Relocs & IAT<br/>Executes TLS Callbacks<br/>Calls DllMain()
 ```
 
 * **Advantage**: The DLL is never registered in the PEB module lists, leaves zero disk records, and runs entirely in unbacked memory pages.
@@ -115,11 +111,9 @@ Hooking is the practice of intercepting function calls to monitor parameters, al
 
 ```mermaid
 flowchart TD
-    subgraph Hooking_Types["🎯 Three Core Hooking Architectures"]
-        H1["1. IAT Hooking<br>Modifies Function Pointer in Import Table<br><i>Low Risk • Easily Detected</i>"]
-        H2["2. Inline Detours<br>Overwrites Function Prologue with JMP Trampoline<br><i>Universal • High Power</i>"]
-        H3["3. VMT Hooking<br>Replaces Pointer in C++ Virtual Function Table<br><i>Clean • Zero Code Patching</i>"]
-    end
+    H1["1. IAT Hooking<br/>Modifies Pointer in Import Table"]
+    H2["2. Inline Detours<br/>Overwrites Prologue with JMP"]
+    H3["3. VMT Hooking<br/>Replaces Pointer in C++ vtable"]
 ```
 
 ---
@@ -161,20 +155,17 @@ Inline hooking overwrites the very first instructions (prologue) of a target fun
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Caller as 💻 Caller
-    participant Original as ⚡ Original Function (Prologue Overwritten with JMP)
-    participant Detour as 🛡️ Custom Detour Function
-    participant Trampoline as 🗂️ Trampoline (Stolen Bytes + JMP Back)
+    participant Caller as Caller
+    participant Orig as Original Func (Hooked)
+    participant Detour as Custom Detour
+    participant Tramp as Trampoline (Stolen Bytes)
 
-    Caller->>Original: Calls Function()
-    Note over Original: Hits 5-byte JMP instruction!
-    Original->>Detour: Jumps to Custom Detour
-    Note over Detour: Inspects/Alters Arguments
-    Detour->>Trampoline: Calls Original Logic via Trampoline
-    Note over Trampoline: Executes Stolen Bytes ➔ Jumps to (Original + 5)
-    Trampoline->>Original: Executes remainder of original function
-    Original-->>Detour: Returns result
-    Detour-->>Caller: Returns altered/inspected result to Caller
+    Caller->>Orig: Calls Function()
+    Orig->>Detour: 5-byte / 14-byte JMP
+    Detour->>Tramp: Calls Original Logic
+    Tramp->>Orig: Jumps to Orig + Offset
+    Orig-->>Detour: Returns Result
+    Detour-->>Caller: Returns Modified Result
 ```
 
 #### The 64-Bit Absolute Jump Challenge:
@@ -193,9 +184,9 @@ sequenceDiagram
 In C++, classes containing `virtual` functions store a hidden pointer (`vptr`) as the very first 8 bytes of the object instance in memory. This `vptr` points to an array of function pointers called the **VMT (`vtable`)**.
 
 ```mermaid
-flowchart LR
-    Obj["C++ Object Instance<br><code>0x00: vptr</code><br><code>0x08: health (100)</code>"] --> VTable["Virtual Method Table<br><code>[0] -> TakeDamage()</code><br><code>[1] -> Render()</code><br><code>[2] -> FireWeapon()</code>"]
-    VTable --> HookedFunc["🛡️ Custom HookedTakeDamage()"]
+flowchart TD
+    Obj["C++ Object Instance<br/>0x00: vptr<br/>0x08: health (100)"] --> VTable["Virtual Method Table<br/>[0] -> TakeDamage()<br/>[1] -> Render()<br/>[2] -> FireWeapon()"]
+    VTable --> Hook["Custom HookedTakeDamage()"]
 ```
 
 #### Execution:

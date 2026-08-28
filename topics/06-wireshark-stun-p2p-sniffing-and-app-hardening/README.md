@@ -27,14 +27,9 @@ When two users initiate a voice or video call on a messaging app, the platform c
 
 ```mermaid
 flowchart TD
-    subgraph P2P_Vulnerable["❌ Vulnerable: Direct Peer-to-Peer Call"]
-        U1["📱 Caller PC / Phone"] <-->|"Direct UDP RTP Audio Stream (Real Public IPs Exposed to Both Sides)"| U2["📱 Recipient PC / Phone"]
-    end
-
-    subgraph Relayed_Safe["🛡️ Hardened: Centralized Server Relay"]
-        C1["📱 Caller"] <-->|"Encrypted Tunnel"| Srv["⚡ Platform Media Relay Server"]
-        Srv <-->|"Encrypted Tunnel"| C2["📱 Recipient"]
-    end
+    P1["Caller Client"] <-->|Direct UDP Stream<br/>(Public IP Exposed)| P2["Recipient Client"]
+    R1["Hardened Caller"] <-->|Encrypted Relay| Srv["Server Relay Gateway<br/>(Meta / Telegram)"]
+    Srv <-->|Encrypted Relay| R2["Hardened Recipient<br/>(IP Protected)"]
 ```
 
 * **Direct P2P (Low Latency / High Risk)**: Audio/video packets travel directly between Caller IP and Recipient IP over UDP. Anyone running Wireshark on either machine can read the other party's public IP address in real time.

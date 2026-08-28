@@ -103,16 +103,14 @@ Before executing a `CALL` instruction, the stack pointer (`RSP`) **must be align
 
 ```mermaid
 flowchart TD
-    subgraph Stack_Layout["Call Stack Layout (Grows Downward from High to Low Memory)"]
-        A["[High Memory] Caller Frame"]
-        B["5th+ Function Arguments (Pushed by Caller)"]
-        C["Return Address (Pushed automatically by CALL)"]
-        D["Saved RBP (Pushed by Prologue: push rbp)"]
-        E["Local Variables (Allocated by: sub rsp, N)"]
-        F["32-Byte Shadow Space (Home Space for RCX, RDX, R8, R9)"]
-        G["[Low Memory] Current RSP Pointer"]
-        A --> B --> C --> D --> E --> F --> G
-    end
+    A["[High Memory] Caller Frame"]
+    B["5th+ Arguments (Stack)"]
+    C["Return Address (CALL)"]
+    D["Saved RBP (push rbp)"]
+    E["Local Variables"]
+    F["32-Byte Shadow Space"]
+    G["[Low Memory] Current RSP"]
+    A --> B --> C --> D --> E --> F --> G
 ```
 
 ### 3.1 Function Prologue
