@@ -5,11 +5,12 @@
 
 [![Author](https://img.shields.io/badge/Author-DaddyZyn%20%7C%20DRAXO.dev-000000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/DaddyZyn)
 [![Topic](https://img.shields.io/badge/Focus-Networking%20%26%20Exploits-000000?style=for-the-badge&logo=shield&logoColor=white)](#)
+[![Tools](https://img.shields.io/badge/CLI%20Tools-Python%20Suite-000000?style=for-the-badge&logo=python&logoColor=white)](./tools)
 [![Request Topic](https://img.shields.io/badge/Request-New%20Topic-000000?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/DaddyZyn/Cyber-security-notes/issues/new?template=topic_request.yml)
 [![Contributions](https://img.shields.io/badge/PRs-Welcome-000000?style=for-the-badge)](./CONTRIBUTING.md)
 
 <p align="center">
-  <b>A structured, deep technical documentation repository for security researchers, systems developers, and learners.</b><br>
+  <b>A structured, deep technical documentation repository and open-source tool suite for security researchers, systems developers, and learners.</b><br>
   <i>Published and maintained by <a href="https://github.com/DaddyZyn"><b>DaddyZyn (DRAXO.dev)</b></a></i>
 </p>
 
@@ -22,6 +23,21 @@
 Have a concept you want explained or documented in deep technical detail?
 * 👉 **[Open a Topic Request on GitHub Issues](https://github.com/DaddyZyn/Cyber-security-notes/issues/new?template=topic_request.yml)**
 * Or submit a pull request following our **[Contributing Guide](./CONTRIBUTING.md)**.
+
+---
+
+## 🧰 Python Security Tool Suite
+
+The repository includes a suite of standalone, zero-dependency Python tools in the **[`/tools`](./tools/)** directory:
+
+| Tool | Focus Area | Quick Command | Description |
+| :--- | :--- | :--- | :--- |
+| **[`opsec_audit.py`](./tools/opsec_audit.py)** | Endpoint Security | `python tools/opsec_audit.py` | Audits outbound SMB port 445 leaks, IPv6 dual-stack bypass, and DNS bindings |
+| **[`arp_watch.py`](./tools/arp_watch.py)** | MITM Detection | `python tools/arp_watch.py --watch` | Real-time sentinel monitoring local ARP cache for duplicate MAC collisions |
+| **[`subnet_calc.py`](./tools/subnet_calc.py)** | Network Math | `python tools/subnet_calc.py 10.0.0.0/16` | Bitwise CIDR calculator: Netmask, Wildcard, Broadcast, Host ranges & Binary |
+| **[`dns_entropy.py`](./tools/dns_entropy.py)** | Exfil Analysis | `python tools/dns_entropy.py <domain>` | Calculates Shannon Entropy to detect DNS tunneling (dnscat2/iodine) |
+
+👉 **[View Full Tools Documentation & Options](./tools/README.md)**
 
 ---
 
